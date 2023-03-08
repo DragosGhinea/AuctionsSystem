@@ -24,4 +24,6 @@ Cereal also has an extra field: cerealType (Nesquik, Chocapic)
 
 ![ClassDesign](https://github.com/DragosGhinea/AuctionsSystem/blob/Lab3/ClassDesign.svg)
 
+2. Created the list using List.of
+
 _-- To be continued --_
