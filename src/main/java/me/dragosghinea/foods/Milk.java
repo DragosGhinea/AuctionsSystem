@@ -23,4 +23,9 @@ public class Milk extends Food{
         setExpirationDate(expirationDate);
         setIngredients(ingredients);
     }
+
+    @Override
+    public String toString() {
+        return "Food: Milk\n" + super.toString();
+    }
 }

@@ -34,4 +34,11 @@ public class Cereal extends Food{
     public void setCerealType(CerealType cerealType) {
         this.cerealType = cerealType;
     }
+
+    @Override
+    public String toString() {
+        return "Food: Cereal\n" +
+                "Cereal Type: " + cerealType.toString() + "\n" +
+                super.toString();
+    }
 }

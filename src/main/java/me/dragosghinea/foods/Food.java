@@ -3,6 +3,8 @@ package me.dragosghinea.foods;
 import me.dragosghinea.types.FoodType;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public abstract class Food {
 
@@ -12,7 +14,7 @@ public abstract class Food {
     private Double calories;
     private FoodType foodType;
 
-    public Food(){
+    protected Food() {
 
     }
 
@@ -54,5 +56,14 @@ public abstract class Food {
 
     public void setFoodType(FoodType foodType) {
         this.foodType = foodType;
+    }
+
+    @Override
+    public String toString() {
+        return "Category: " + getFoodType() + "\n" +
+                "Price: " + getPrice() + "\n" +
+                "Calories: " + getCalories() + "\n" +
+                "Expiration Date: " + new SimpleDateFormat("MM/dd/yyyy").format(new Date(expirationDate*1000)) + "\n" +
+                "Ingredients: " + getIngredients() + "\n";
     }
 }

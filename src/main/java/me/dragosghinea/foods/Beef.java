@@ -23,4 +23,9 @@ public class Beef extends Food{
         setExpirationDate(expirationDate);
         setIngredients(ingredients);
     }
+
+    @Override
+    public String toString() {
+        return "Food: Beef\n" + super.toString();
+    }
 }

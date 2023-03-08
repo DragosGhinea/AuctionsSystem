@@ -26,4 +26,6 @@ Cereal also has an extra field: cerealType (Nesquik, Chocapic)
 
 2. Created the list using List.of
 
-_-- To be continued --_
+3. Sorted the foods list using stream().sorted(), the version in which we pass a comparator to the sorted method.
+Alternatively, instead of passing an argument we could have implemented Comparable interface to the Food class and override
+the compareTo() method.

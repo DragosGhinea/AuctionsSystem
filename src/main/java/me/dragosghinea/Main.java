@@ -20,6 +20,9 @@ public class Main {
                 new Milk(1.22d, now.plusDays(5).toEpochSecond(), "99% Milk, 1% Who Knows")
         );
 
+        //orders foods in descending order based on calories
+        foodList = foodList.stream().sorted((f1, f2) -> f2.getCalories().compareTo(f1.getCalories())).toList();
 
+        System.out.println(foodList);
     }
 }
