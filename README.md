@@ -22,6 +22,6 @@ Cereal also has an extra field: cerealType (Nesquik, Chocapic)
 
 1. The classes were designed as shown in the below diagram.
 
-![ClassDesign](https://github.com/DragosGhinea/AuctionsSystem/tree/Lab3/blob/main/ClassDesign.svg)
+![ClassDesign](https://github.com/DragosGhinea/AuctionsSystem/blob/Lab3/ClassDesign.svg)
 
 _-- To be continued --_
