@@ -2,7 +2,7 @@ package me.dragosghinea.user.details;
 
 import org.mindrot.jbcrypt.BCrypt;
 
-public class DefaultUserDetails implements UserDetails{
+public class DefaultUserDetails implements UserDetails, Cloneable{
     private String email;
     private String username;
     private Long birthDateEpoch;
@@ -77,4 +77,8 @@ public class DefaultUserDetails implements UserDetails{
         return BCrypt.checkpw(password, passwordHash);
     }
 
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }

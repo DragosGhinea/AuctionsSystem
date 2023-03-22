@@ -11,7 +11,12 @@ public class DefaultUserDetailsBuilder implements UserDetailsAbstractBuilder{
     }
 
     public DefaultUserDetailsBuilder(DefaultUserDetails userDetails){
-        this.userDetails = userDetails;
+        try {
+            this.userDetails = (DefaultUserDetails) userDetails.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            this.userDetails = new DefaultUserDetails();
+        }
     }
 
     public UserDetailsAbstractBuilder setEmail(String email) {
