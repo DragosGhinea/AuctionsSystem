@@ -16,5 +16,7 @@ public interface UserDetailsAbstractBuilder {
 
     UserDetailsAbstractBuilder setPassword(String password);
 
+    UserDetailsAbstractBuilder setPasswordHash(String passwordHash);
+
     UserDetails build();
 }

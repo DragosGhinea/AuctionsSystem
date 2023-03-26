@@ -1,6 +1,6 @@
 package me.dragosghinea.user.details;
 
-public interface UserDetails {
+public interface UserDetails extends Cloneable {
 
     String getEmail();
     String getUsername();
@@ -9,4 +9,6 @@ public interface UserDetails {
     String getLastName();
 
     Boolean checkPassword(String password);
+
+    Object clone();
 }

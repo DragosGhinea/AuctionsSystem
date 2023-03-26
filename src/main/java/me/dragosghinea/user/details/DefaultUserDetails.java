@@ -2,7 +2,7 @@ package me.dragosghinea.user.details;
 
 import org.mindrot.jbcrypt.BCrypt;
 
-public class DefaultUserDetails implements UserDetails, Cloneable{
+public class DefaultUserDetails implements UserDetails{
     private String email;
     private String username;
     private Long birthDateEpoch;
@@ -22,10 +22,13 @@ public class DefaultUserDetails implements UserDetails, Cloneable{
         this.lastName = lastName;
     }
 
-    private static final int WORKLOAD = 12;
     public void setPassword(String password) {
-        String salt = BCrypt.gensalt(WORKLOAD);
+        String salt = BCrypt.gensalt(12);
         this.passwordHash = BCrypt.hashpw(password, salt);
+    }
+
+    public void setPasswordHash(String passwordHash){
+        this.passwordHash = passwordHash;
     }
 
     public String getLastName() {
@@ -78,7 +81,12 @@ public class DefaultUserDetails implements UserDetails, Cloneable{
     }
 
     @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
+    public Object clone(){
+        try {
+            return super.clone();
+        }catch(Exception x){
+            x.printStackTrace(); //should never happen
+        }
+        return null;
     }
 }

@@ -11,12 +11,7 @@ public class DefaultUserDetailsBuilder implements UserDetailsAbstractBuilder{
     }
 
     public DefaultUserDetailsBuilder(DefaultUserDetails userDetails){
-        try {
-            this.userDetails = (DefaultUserDetails) userDetails.clone();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-            this.userDetails = new DefaultUserDetails();
-        }
+        this.userDetails = (DefaultUserDetails) userDetails.clone();
     }
 
     public UserDetailsAbstractBuilder setEmail(String email) {
@@ -46,6 +41,12 @@ public class DefaultUserDetailsBuilder implements UserDetailsAbstractBuilder{
 
     public UserDetailsAbstractBuilder setPassword(String password) {
         userDetails.setPassword(password);
+        return this;
+    }
+
+    @Override
+    public UserDetailsAbstractBuilder setPasswordHash(String passwordHash) {
+        userDetails.setPasswordHash(passwordHash);
         return this;
     }
 

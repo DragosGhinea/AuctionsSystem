@@ -1,4 +1,4 @@
-package display;
+package me.dragosghinea.display.events;
 
 import java.util.Properties;
 

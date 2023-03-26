@@ -11,7 +11,7 @@ import java.util.List;
 
 public class DefaultWallet implements Wallet {
 
-    private List<Currency> availableCurrencies = new ArrayList<Currency>();
+    private List<Currency> availableCurrencies = new ArrayList<>();
     private User owner;
     private Currency preferredCurrency;
 
