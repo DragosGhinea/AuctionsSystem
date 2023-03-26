@@ -1,11 +1,11 @@
-package menus.user;
+package me.dragosghinea.menus.user;
 
 
 import me.dragosghinea.display.Display;
 import me.dragosghinea.display.events.DisplayOutputListener;
+import me.dragosghinea.menus.Menu;
 import me.dragosghinea.user.details.builder.DefaultUserDetailsBuilder;
 import me.dragosghinea.user.details.builder.UserDetailsAbstractBuilder;
-import menus.Menu;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

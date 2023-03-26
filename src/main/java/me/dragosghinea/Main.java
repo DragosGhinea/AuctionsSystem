@@ -1,7 +1,7 @@
 package me.dragosghinea;
 
 import me.dragosghinea.display.TerminalDisplay;
-import menus.user.CreateUser;
+import me.dragosghinea.menus.user.CreateUser;
 
 import java.util.Scanner;
 

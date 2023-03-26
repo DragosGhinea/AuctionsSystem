@@ -1,4 +1,4 @@
-package menus;
+package me.dragosghinea.menus;
 
 import me.dragosghinea.display.Display;
 import me.dragosghinea.display.events.DisplayInputListener;
