@@ -1,7 +1,7 @@
 package me.dragosghinea;
 
 import me.dragosghinea.display.TerminalDisplay;
-import me.dragosghinea.menus.user.CreateUser;
+import me.dragosghinea.menus.user.CreateUserMenu;
 
 import java.util.Scanner;
 
@@ -22,7 +22,7 @@ public class Main {
                         @Override
                         public void run() {
                             TerminalDisplay display = new TerminalDisplay();
-                            CreateUser createMenu = new CreateUser(display);
+                            CreateUserMenu createMenu = new CreateUserMenu(display);
                         }
                     }.start();
 
