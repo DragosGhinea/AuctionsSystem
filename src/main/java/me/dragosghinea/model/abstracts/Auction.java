@@ -18,6 +18,7 @@ import java.util.UUID;
 public abstract class Auction {
     private UUID auctionId;
     private LocalDateTime startDate;
+    private LocalDateTime endDate;
 
     private BidHistory bidHistory;
     private AuctionState auctionState;

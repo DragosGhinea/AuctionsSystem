@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 public class LongAuction extends Auction {
 
     private Duration extendTime;
-    private LocalDateTime endDate;
     private LocalDateTime overTime;
 
     public LongAuction(){
@@ -23,7 +22,7 @@ public class LongAuction extends Auction {
 
     public LongAuction(Duration extendTime, LocalDateTime endDate){
         this.extendTime = extendTime;
-        this.endDate = endDate;
+        super.setEndDate(endDate);
         this.overTime = endDate;
     }
 }
