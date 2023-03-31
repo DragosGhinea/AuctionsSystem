@@ -70,4 +70,18 @@ public class UserServiceImpl implements UserService {
         }
         return removed;
     }
+
+    @Override
+    public boolean addAuctionToUser(UUID userId, UUID auctionId) {
+        return getUserById(userId)
+                .map(user -> user.getUserAuctions().getAuctions().add(auctionId))
+                .orElse(false);
+    }
+
+    @Override
+    public boolean removeAuctionFromUser(UUID userId, UUID auctionId) {
+        return getUserById(userId)
+                .map(user -> user.getUserAuctions().getAuctions().remove(auctionId))
+                .orElse(false);
+    }
 }

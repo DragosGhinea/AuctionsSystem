@@ -6,10 +6,20 @@ public enum AuctionState {
     ENDED("Ended", "The auction has ended."),
     CANCELLED("Cancelled", "This auction has been cancelled."),
     OVERTIME("Overtime", "The auction end date was prolonged because of last minute bids."),
-    PREPARING("Preparing", "Be ready for the next item in this auction");
+    PREPARING("Preparing", "Be ready for the next item in this auction"),
 
-    private String stateName;
-    private String stateDescription;
+    UNKNOWN("Unknown", "Could not determine the state of the auction.");
+
+    private final String stateName;
+    private final String stateDescription;
+
+    public String getStateName(){
+        return stateName;
+    }
+
+    public String getStateDescription(){
+        return stateDescription;
+    }
 
     AuctionState(String stateName, String stateDescription){
         this.stateName = stateName;

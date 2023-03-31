@@ -2,13 +2,14 @@ package me.dragosghinea.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.dragosghinea.model.abstracts.Auction;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
 public class UserAuctions {
 
-    private List<Auction> auctions;
+    private Set<UUID> auctions = new HashSet<>();
 }
