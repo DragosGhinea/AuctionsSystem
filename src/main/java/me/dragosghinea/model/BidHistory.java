@@ -3,6 +3,7 @@ package me.dragosghinea.model;
 import lombok.Getter;
 import lombok.Setter;
 import me.dragosghinea.model.abstracts.Auction;
+import me.dragosghinea.model.abstracts.Bid;
 
 import java.util.ArrayList;
 import java.util.List;

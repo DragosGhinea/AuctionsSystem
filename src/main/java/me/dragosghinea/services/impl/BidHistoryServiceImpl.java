@@ -1,10 +1,11 @@
 package me.dragosghinea.services.impl;
 
-import me.dragosghinea.model.Bid;
 import me.dragosghinea.model.BidHistory;
+import me.dragosghinea.model.BidRecord;
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.Wallet;
 import me.dragosghinea.model.abstracts.Auction;
+import me.dragosghinea.model.abstracts.Bid;
 import me.dragosghinea.model.enums.Currency;
 import me.dragosghinea.services.BidHistoryService;
 import me.dragosghinea.services.UserService;
@@ -79,7 +80,7 @@ public class BidHistoryServiceImpl implements BidHistoryService {
         else if(userService.getUserById(userId).isEmpty())
             return false;
 
-        bidHistory.getBids().add(new Bid(userId, getAuction().getAuctionId(), needsToPay, points, LocalDateTime.now()));
+        bidHistory.getBids().add(new BidRecord(userId, getAuction().getAuctionId(), needsToPay, points, LocalDateTime.now()));
         return true;
     }
 

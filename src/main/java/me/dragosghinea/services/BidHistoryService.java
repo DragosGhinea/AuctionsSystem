@@ -1,7 +1,7 @@
 package me.dragosghinea.services;
 
-import me.dragosghinea.model.Bid;
 import me.dragosghinea.model.abstracts.Auction;
+import me.dragosghinea.model.abstracts.Bid;
 import me.dragosghinea.model.enums.Currency;
 
 import java.math.BigDecimal;
