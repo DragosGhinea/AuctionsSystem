@@ -1,9 +1,6 @@
 package me.dragosghinea.model.abstracts;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import me.dragosghinea.model.enums.RewardType;
 
@@ -19,5 +16,5 @@ public abstract class Reward {
     private String rewardName;
     private String rewardDescription;
     private UUID auctionId;
-    private RewardType rewardType;
+    private RewardType rewardType = RewardType.UNKNOWN;
 }
