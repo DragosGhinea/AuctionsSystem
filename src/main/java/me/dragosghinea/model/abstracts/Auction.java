@@ -16,7 +16,7 @@ import java.util.UUID;
 @Setter
 @SuperBuilder
 public abstract class Auction {
-    private UUID auctionId;
+    private UUID auctionId = UUID.randomUUID();
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 

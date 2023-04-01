@@ -11,7 +11,7 @@ public class MainMenu implements Menu{
                 new CreateUserMenu().start();
             }
             case LOGIN -> {
-
+                new LoginMenu().start();
             }
             default -> {
                 getOutputSource().println("Unknown option '"+input+"'!");

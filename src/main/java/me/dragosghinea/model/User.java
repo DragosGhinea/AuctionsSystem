@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Getter
 public class User {
-    private UUID userId;
+    private UUID userId = UUID.randomUUID();
 
     @Setter
     private Wallet wallet;
