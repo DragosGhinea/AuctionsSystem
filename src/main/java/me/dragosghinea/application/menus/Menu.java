@@ -6,8 +6,8 @@ import java.util.Scanner;
 
 public interface Menu {
 
-    default InputStream getInputSource(){
-        return System.in;
+    default Scanner getInputSource(){
+        return new Scanner(System.in);
     }
 
     default PrintStream getOutputSource(){
@@ -23,11 +23,10 @@ public interface Menu {
     }
 
     default void start(){
-        Scanner scanner = new Scanner(getInputSource());
         String input;
         while (true) {
             getOutputSource().println(menuOptions());
-            input = scanner.nextLine();
+            input = getInputSource().nextLine();
 
             if(input.equals("quit") || input.equals("q") || input.equals("back") || input.equals("exit")) {
                 onExit();

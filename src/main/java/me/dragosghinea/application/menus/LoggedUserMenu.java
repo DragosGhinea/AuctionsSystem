@@ -2,7 +2,6 @@ package me.dragosghinea.application.menus;
 
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.UserDetails;
-import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.services.AuctionService;
 import me.dragosghinea.services.UserService;
 import me.dragosghinea.services.impl.BlitzAuctionServiceImpl;
@@ -11,9 +10,18 @@ import me.dragosghinea.services.impl.UserServiceImpl;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
+import java.util.Scanner;
 import java.util.UUID;
 
 public class LoggedUserMenu implements Menu{
+
+    private final Scanner scanner = new Scanner(System.in);
+
+    @Override
+    public Scanner getInputSource() {
+        return scanner;
+    }
+
     private final User user;
     private boolean shouldExit;
     private final AuctionService longAuctionService = new LongAuctionServiceImpl();
@@ -64,7 +72,7 @@ public class LoggedUserMenu implements Menu{
                 }
             }
             case WALLET -> {
-
+                new WalletMenu(user).start();
             }
             case DELETE_ACCOUNT -> {
                 if(userService.removeUser(user)) {

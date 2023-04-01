@@ -7,6 +7,7 @@ import lombok.Setter;
 import me.dragosghinea.model.enums.Currency;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Getter
 @Setter
@@ -35,4 +36,12 @@ public class Wallet {
         this.points = this.points.add(points);
     }
 
+    @Override
+    public String toString() {
+        if(points.compareTo(BigDecimal.ONE) == 0){
+            return "1.000 "+preferredCurrency.getSingularName();
+        }
+
+        return preferredCurrency.getCurrencyAmount(points).setScale(3, RoundingMode.HALF_EVEN).toPlainString()+" "+preferredCurrency.getPluralName();
+    }
 }

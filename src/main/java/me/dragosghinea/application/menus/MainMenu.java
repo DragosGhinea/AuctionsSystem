@@ -1,6 +1,14 @@
 package me.dragosghinea.application.menus;
 
+import java.util.Scanner;
+
 public class MainMenu implements Menu{
+    private final Scanner scanner = new Scanner(System.in);
+
+    @Override
+    public Scanner getInputSource() {
+        return scanner;
+    }
 
     @Override
     public void receiveInput(String input) {

@@ -51,6 +51,11 @@ public enum Currency {
     }
 
     public BigDecimal getCurrencyAmount(BigDecimal points) {
-        return points.divide(points, RoundingMode.HALF_EVEN);
+        return points.divide(unitValue, RoundingMode.HALF_EVEN);
+    }
+
+    @Override
+    public String toString() {
+        return getCurrencyName()+" ("+getSymbol()+") | "+getSingularName()+"/"+getPluralName();
     }
 }

@@ -9,8 +9,16 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Scanner;
 
 public class CreateUserMenu implements Menu{
+
+    private final Scanner scanner = new Scanner(System.in);
+
+    @Override
+    public Scanner getInputSource() {
+        return scanner;
+    }
 
     private boolean shouldExit = false;
     private final UserDetails.UserDetailsBuilder userDetailsBuilder = UserDetails.builder();

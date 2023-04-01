@@ -1,21 +1,20 @@
 package me.dragosghinea.application.menus;
 
 import me.dragosghinea.model.User;
-import me.dragosghinea.model.UserDetails;
 import me.dragosghinea.services.UserService;
 import me.dragosghinea.services.impl.UserServiceImpl;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
 import java.util.Scanner;
 import java.util.function.Predicate;
 
 public class LoginMenu implements Menu {
+
+    private final Scanner scanner = new Scanner(System.in);
+
+    @Override
+    public Scanner getInputSource() {
+        return scanner;
+    }
 
     private boolean shouldExit = false;
     private final UserService userService = new UserServiceImpl();

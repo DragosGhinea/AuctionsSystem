@@ -10,7 +10,7 @@ public class User {
     private UUID userId = UUID.randomUUID();
 
     @Setter
-    private Wallet wallet;
+    private Wallet wallet = new Wallet(this);
     private UserAuctions userAuctions = new UserAuctions();
 
     private UserDetails userDetails;
