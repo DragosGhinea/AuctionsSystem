@@ -10,7 +10,6 @@ import me.dragosghinea.model.enums.RewardType;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@Builder
 public class SingleReward extends Reward {
 
     private String rewardInfo;

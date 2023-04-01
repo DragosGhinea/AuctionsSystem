@@ -16,16 +16,18 @@ public class User {
     private UserDetails userDetails;
 
     public User(UserDetails details) {
-        this.userDetails = details;
+        this.userDetails = (UserDetails) details.clone();
     }
 
     public User(UserDetails details, UserAuctions userAuctions){
-        this.userDetails = details;
+        this.userDetails = (UserDetails) details.clone();
+        userDetails.setUserId(userId);
         this.userAuctions = userAuctions;
     }
 
-    void setUserDetails(UserDetails details){
-        userDetails = details;
+    public void setUserDetails(UserDetails details){
+        userDetails = (UserDetails) details.clone();
+        userDetails.setUserId(userId);
     }
 
 }

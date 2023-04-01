@@ -13,7 +13,7 @@ import java.util.UUID;
 @Builder
 @ToString
 @EqualsAndHashCode
-public class UserDetails {
+public class UserDetails implements Cloneable{
     private UUID userId;
     @Setter
     private String email;
@@ -34,5 +34,19 @@ public class UserDetails {
 
     public boolean checkPassword(String password) {
         return BCrypt.checkpw(password, passwordHash);
+    }
+
+    void setUserId(UUID userId) {
+        this.userId = userId;
+    }
+
+    @Override
+    public Object clone(){
+        try {
+            return super.clone();
+        }catch(Exception x){
+            x.printStackTrace(); //should never happen
+            return null;
+        }
     }
 }

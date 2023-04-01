@@ -8,22 +8,25 @@ import lombok.experimental.SuperBuilder;
 import me.dragosghinea.model.BidHistory;
 import me.dragosghinea.model.enums.AuctionState;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
 @Setter
 @SuperBuilder
-@Builder
 public abstract class Auction {
     private UUID auctionId;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
     private BidHistory bidHistory;
-    private AuctionState auctionState;
+    private AuctionState auctionState = AuctionState.UNKNOWN;
 
     private Reward reward;
+
+    private BigDecimal startingBidAmount;
+    private BigDecimal minimumBidGap;
 
     public Auction(){
 
