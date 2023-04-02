@@ -47,17 +47,14 @@ It is more intense than a long auction because people have a very short amount o
 to bid after the bidding has started (eg. 10 seconds), and the time refreshes after each bid.
 
 There are systems to prevent exploits such as:
- - for long auctions the money is taken from your account and in case of losing you get it back when the auction ends
  - for long auctions, if a bid is placed at the last moment, the auction time is extended to allow counter bids
- - for blitz auctions the money is not taken from your account until the end, but if you don't have the amount of money to pay your highest bid, the win goes to the next valid bid
- - for blitz auctions if you reach 3 invalid auctions (by trying the exploit above), your account gets suspended
 
 
 ### Wallets
 
 Each user should have a wallet from which money will be subtracted for auctions.
 For simplicity, when you deposit money into the wallet, your money will get converted into
-a special system currency named **credits**.
+a special system currency named **points**.
 
 Although all the auctions will be held in points, if you select a preferred currency,
 the auctions will be displayed in that currency for you.
@@ -71,9 +68,9 @@ A **bid** should hold identification information about:
 (we will handle that via a bridge between a bid and an auction, to be more precise a **BidHistory**).
  - the user that has placed the bid
 (for the user we'd also like to know the auctions to which they bid)
- - the amount of credits promised
+ - the amount of points promised
 
-### Auction States and Time Manager
+### Auction States
 
 An auction can be in a various number of states but some basic ones we consider:
  - NotStarted
@@ -83,34 +80,13 @@ An auction can be in a various number of states but some basic ones we consider:
  - Overtime (specific for LongAuction)
  - Preparing (specific for BlitzAuction)
 
-These states should be controlled automatically by an internal **AuctionStateManager** which manages both the state and the time options of an auction.
-
 ### Rewards
 
 You win an auction but do you actually win? A reward of course!
 
 Rewards can be:
  - SingleReward (a single item is considered a reward)
- - RewardPack (a list of items is considered a reward)
-
-In blitz auctions, to give more people a chance and to make it last longer, you can make a **RewardPack** be auctioned
-as a series of single rewards, one right after another.
-
-### Auction Browser
-
-Users must have a way to check the available auctions so a browser class
-will provide a list to them, with either sorted or filtered auctions.
-
-### AuctionContainer
-
-To properly display changes of the auction in real time, we need an observer
-to tell the user sessions that are checking that auction out what modifications
-are being made to the auction.
-
-### Display
-
-How is the information displayed to the users? We need a class for that.
-For the first stage we will implement a "TerminalDisplay" but in the second stage
-a prettier display may be implemented.
+ - MultiReward (a list of items is considered a reward)
+ - BundleReward (a list of other rewards as reward)
 
 
