@@ -54,18 +54,20 @@ public class BidHistoryServiceImpl implements BidHistoryService {
 
     @Override
     public boolean addBid(UUID userId, BigDecimal points, boolean takePoints) {
-        if(points.compareTo(BigDecimal.ZERO)<0)
+        if(points.compareTo(BigDecimal.ZERO)<0) {
             return false;
+        }
 
-        if(getLatestBid().map(Bid::getPointsBid).orElse(BigDecimal.ZERO).compareTo(points)<0)
+        if(getLatestBid().map(Bid::getTotalBidValue).orElse(BigDecimal.ZERO).compareTo(points)>=0) {
             return false;
+        }
 
-        BigDecimal needsToPay;
-        Bid bid = highestBids.getOrDefault(userId, null);
-        if(bid == null)
-            needsToPay = points;
-        else
-            needsToPay = points.subtract(bid.getPointsBid());
+
+        BigDecimal needsToPay = points.subtract(
+                getHighestBid(userId)
+                .map(Bid::getTotalBidValue)
+                .orElse(BigDecimal.ZERO)
+        );
 
 
         if(takePoints){
@@ -74,8 +76,9 @@ public class BidHistoryServiceImpl implements BidHistoryService {
                                     .map(wallet -> wallet.removePoints(needsToPay))
                                     .orElse(false);
 
-            if(!tookPoints)
+            if(!tookPoints) {
                 return false;
+            }
         }
         else if(userService.getUserById(userId).isEmpty())
             return false;

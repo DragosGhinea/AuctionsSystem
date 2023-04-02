@@ -9,9 +9,10 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class BlitzAuction extends Auction {
     private Duration bidDuration;
     private Duration preparingDuration;

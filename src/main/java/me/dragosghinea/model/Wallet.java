@@ -38,7 +38,15 @@ public class Wallet {
 
     @Override
     public String toString() {
-        if(points.compareTo(BigDecimal.ONE) == 0){
+        if(preferredCurrency.getCurrencyAmount(points).compareTo(BigDecimal.ONE) == 0){
+            return "1.000 "+preferredCurrency.getSingularName();
+        }
+
+        return preferredCurrency.getCurrencyAmount(points).setScale(3, RoundingMode.HALF_EVEN).toPlainString()+" "+preferredCurrency.getPluralName();
+    }
+
+    public String toString(BigDecimal points){
+        if(preferredCurrency.getCurrencyAmount(points).compareTo(BigDecimal.ONE) == 0){
             return "1.000 "+preferredCurrency.getSingularName();
         }
 

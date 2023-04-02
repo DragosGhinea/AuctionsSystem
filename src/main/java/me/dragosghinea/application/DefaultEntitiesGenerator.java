@@ -37,9 +37,10 @@ public class DefaultEntitiesGenerator {
     public static List<Auction> getDefaultAuctions() {
         LocalDateTime now = LocalDateTime.now();
         return List.of(
-            LongAuction.builder()
+            new LongAuction().toBuilder()
                     .startDate(now.plusMinutes(2))
                     .endDate(now.plusMinutes(5))
+                    .overTime(now.plusMinutes(5))
                     .extendTime(Duration.ofMinutes(2))
                     .startingBidAmount(BigDecimal.valueOf(100))
                     .minimumBidGap(BigDecimal.valueOf(20))
@@ -51,9 +52,10 @@ public class DefaultEntitiesGenerator {
                                     .build()
                     )
                     .build(),
-            LongAuction.builder()
+            new LongAuction().toBuilder()
                     .startDate(now.minusMinutes(1))
                     .endDate(now.plusMinutes(10))
+                    .overTime(now.plusMinutes(10))
                     .extendTime(Duration.ofMinutes(5))
                     .startingBidAmount(BigDecimal.valueOf(1000))
                     .minimumBidGap(BigDecimal.valueOf(200))
@@ -65,7 +67,7 @@ public class DefaultEntitiesGenerator {
                                     .build()
                     )
                     .build(),
-            BlitzAuction.builder()
+            new BlitzAuction().toBuilder()
                     .startDate(now)
                     .preparingDuration(Duration.ofMinutes(1))
                     .bidDuration(Duration.ofSeconds(20))
