@@ -1,7 +1,6 @@
 package me.dragosghinea.model;
 
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDate;

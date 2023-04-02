@@ -3,7 +3,6 @@ package me.dragosghinea.services.impl;
 import me.dragosghinea.model.BidHistory;
 import me.dragosghinea.model.BidRecord;
 import me.dragosghinea.model.User;
-import me.dragosghinea.model.Wallet;
 import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.abstracts.Bid;
 import me.dragosghinea.model.enums.Currency;

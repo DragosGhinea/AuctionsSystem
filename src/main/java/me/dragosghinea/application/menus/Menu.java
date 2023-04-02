@@ -1,6 +1,5 @@
 package me.dragosghinea.application.menus;
 
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
 

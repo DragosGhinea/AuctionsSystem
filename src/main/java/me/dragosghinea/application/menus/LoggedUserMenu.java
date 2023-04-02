@@ -3,7 +3,6 @@ package me.dragosghinea.application.menus;
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.UserDetails;
 import me.dragosghinea.model.abstracts.Auction;
-import me.dragosghinea.services.AuctionService;
 import me.dragosghinea.services.BlitzAuctionService;
 import me.dragosghinea.services.LongAuctionService;
 import me.dragosghinea.services.UserService;
@@ -79,7 +78,7 @@ public class LoggedUserMenu implements Menu {
                 new AuctionsBrowseMenu(
                         user,
                         union,
-                        Comparator.comparing(a -> a.getBidHistory().getBids().size()),
+                        Comparator.comparing(a -> -a.getBidHistory().getBids().size()),
                         "by most bids"
                 ).start();
             }
@@ -93,7 +92,7 @@ public class LoggedUserMenu implements Menu {
                             int sz = a.getBidHistory().getBids().size();
                             if (sz == 0)
                                 return BigDecimal.ZERO;
-                            return a.getBidHistory().getBids().get(sz - 1).getTotalBidValue();
+                            return a.getBidHistory().getBids().get(sz - 1).getTotalBidValue().multiply(BigDecimal.valueOf(-1));
                         }),
                         "by highest bid"
                 ).start();

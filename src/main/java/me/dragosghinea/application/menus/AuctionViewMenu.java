@@ -99,6 +99,9 @@ public class AuctionViewMenu implements Menu{
                 if(!bidHistoryService.removeAllBids(user.getUserId(), true)){
                     getOutputSource().println("Nothing to remove.");
                 }
+                else{
+                    user.getUserAuctions().getAuctions().remove(auction.getAuctionId());
+                }
             }
             default -> {
                 getOutputSource().println("Unknown option '" + input + "'!");
@@ -135,6 +138,8 @@ public class AuctionViewMenu implements Menu{
             sBuilder.append("  Auction (");
         sBuilder.append(auction.getAuctionState().getStateName()).append(")\n");
         sBuilder.append(auction.getAuctionState().getStateDescription()).append("\n");
+        sBuilder.append("Reward: ").append(auction.getReward().getRewardName()).append("\n");
+        sBuilder.append("Description: ").append(auction.getReward().getRewardDescription()).append("\n");
 
         String highestBid = bidHistoryService.getLatestBid()
                 .map(bid -> user.getWallet().toString(bid.getTotalBidValue())).orElse("None");

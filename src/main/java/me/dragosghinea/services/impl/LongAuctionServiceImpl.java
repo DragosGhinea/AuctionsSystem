@@ -64,11 +64,19 @@ public class LongAuctionServiceImpl implements LongAuctionService {
 
     @Override
     public Optional<LongAuction> getAuctionById(UUID auctionId) {
-        return Optional.ofNullable(auctions.getOrDefault(auctionId, null));
+        LongAuction auction = auctions.getOrDefault(auctionId, null);
+        if(auction == null)
+            return Optional.empty();
+
+        auction.setAuctionState(getActualState(auction));
+        return Optional.of(auction);
     }
 
     @Override
     public List<LongAuction> getAuctions(Predicate<LongAuction> check) {
-        return auctions.values().stream().filter(check).toList();
+        return auctions.values().stream()
+                .filter(check)
+                .peek(auction -> auction.setAuctionState(getActualState(auction)))
+                .toList();
     }
 }

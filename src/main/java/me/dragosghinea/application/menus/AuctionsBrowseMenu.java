@@ -20,10 +20,12 @@ public class AuctionsBrowseMenu implements Menu {
 
     private static final int PER_PAGE = 2;
     private int page = 0;
+    private final Comparator<Auction> comparator;
 
     public AuctionsBrowseMenu(User user, Collection<Auction> auctions, Comparator<Auction> comparator, String sortName) {
         this.user = user;
         this.auctions = new ArrayList<>(auctions);
+        this.comparator = comparator;
         this.auctions.sort(comparator);
         this.sortName = sortName;
     }
@@ -62,6 +64,7 @@ public class AuctionsBrowseMenu implements Menu {
                         }
 
                         new AuctionViewMenu(user, auctions.get(nr-1)).start();
+                        this.auctions.sort(comparator);
                         break;
                     }catch(Exception x){
                         getOutputSource().println("That is not a valid integer.");

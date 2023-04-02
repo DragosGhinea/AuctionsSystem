@@ -30,15 +30,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> createUser(UserDetails userDetails) {
         Predicate<UserDetails> isSimilar = (usrDetails) -> {
-            if(usrDetails.getEmail().equalsIgnoreCase(userDetails.getEmail()))
+            if (usrDetails.getEmail().equalsIgnoreCase(userDetails.getEmail()))
                 return true;
-            if(usrDetails.getUsername().equalsIgnoreCase(userDetails.getUsername()))
+            if (usrDetails.getUsername().equalsIgnoreCase(userDetails.getUsername()))
                 return true;
 
             return false;
         };
 
-        if(users.values().stream().map(User::getUserDetails).anyMatch(isSimilar)){
+        if (users.values().stream().map(User::getUserDetails).anyMatch(isSimilar)) {
             return Optional.empty();
         }
         User newUser = new User(userDetails);
@@ -61,9 +61,9 @@ public class UserServiceImpl implements UserService {
     public List<User> removeAllUsers(Predicate<User> condition) {
         Iterator<Map.Entry<UUID, User>> entriesIterator = users.entrySet().iterator();
         List<User> removed = new ArrayList<>();
-        while(entriesIterator.hasNext()){
+        while (entriesIterator.hasNext()) {
             Map.Entry<UUID, User> entry = entriesIterator.next();
-            if(condition.test(entry.getValue())){
+            if (condition.test(entry.getValue())) {
                 removed.add(entry.getValue());
                 entriesIterator.remove();
             }

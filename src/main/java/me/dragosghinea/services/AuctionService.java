@@ -9,16 +9,16 @@ import java.util.UUID;
 
 public interface AuctionService {
 
-    default boolean startAuction(Auction auction){
-        if(auction.getStartDate().isBefore(LocalDateTime.now()))
+    default boolean startAuction(Auction auction) {
+        if (auction.getStartDate().isBefore(LocalDateTime.now()))
             return false;
 
         auction.setStartDate(LocalDateTime.now());
         return false;
     }
 
-    default boolean cancelAuction(Auction auction){
-        if(auction.getAuctionState().equals(AuctionState.CANCELLED))
+    default boolean cancelAuction(Auction auction) {
+        if (auction.getAuctionState().equals(AuctionState.CANCELLED))
             return false;
 
         auction.setAuctionState(AuctionState.CANCELLED);

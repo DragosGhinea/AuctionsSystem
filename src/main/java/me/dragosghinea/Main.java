@@ -2,7 +2,6 @@ package me.dragosghinea;
 
 import me.dragosghinea.application.DefaultEntitiesGenerator;
 import me.dragosghinea.application.menus.MainMenu;
-import me.dragosghinea.model.BidHistory;
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.services.AuctionService;
@@ -25,13 +24,9 @@ public class Main {
         AuctionService auctionServiceLong = new LongAuctionServiceImpl();
 
         for (Auction a : DefaultEntitiesGenerator.getDefaultAuctions()) {
-            if (!auctionServiceLong.addAuction(a))
+            if (!auctionServiceLong.addAuction(a)) {
                 auctionServiceBlitz.addAuction(a);
-
-            if(a.getBidHistory() == null)
-                System.out.println("TEST");
-            if(a.getAuctionState() == null)
-                System.out.println("TEST2");
+            }
         }
 
         new MainMenu().start();

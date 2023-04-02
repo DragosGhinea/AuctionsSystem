@@ -2,8 +2,6 @@ package me.dragosghinea.application.menus;
 
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.enums.Currency;
-import me.dragosghinea.services.UserService;
-import me.dragosghinea.services.impl.UserServiceImpl;
 
 import java.math.BigDecimal;
 import java.util.Scanner;

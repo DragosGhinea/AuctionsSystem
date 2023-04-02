@@ -12,11 +12,15 @@ import java.time.LocalDateTime;
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class BlitzAuction extends Auction {
     private Duration bidDuration;
     private Duration preparingDuration;
     public LocalDateTime getActualStartDate(){
         return super.getStartDate().plus(preparingDuration);
+    }
+
+    @Override
+    public String toString() {
+        return "<Blitz Auction>\n"+super.toString();
     }
 }

@@ -65,11 +65,19 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
 
     @Override
     public Optional<BlitzAuction> getAuctionById(UUID auctionId) {
-        return Optional.ofNullable(auctions.getOrDefault(auctionId, null));
+        BlitzAuction auction = auctions.getOrDefault(auctionId, null);
+        if(auction == null)
+            return Optional.empty();
+
+        auction.setAuctionState(getActualState(auction));
+        return Optional.of(auction);
     }
 
     @Override
     public List<BlitzAuction> getAuctions(Predicate<BlitzAuction> check) {
-        return auctions.values().stream().filter(check).toList();
+        return auctions.values().stream()
+                .filter(check)
+                .peek(auction -> auction.setAuctionState(getActualState(auction)))
+                .toList();
     }
 }
