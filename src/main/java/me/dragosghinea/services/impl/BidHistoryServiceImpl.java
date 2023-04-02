@@ -82,7 +82,9 @@ public class BidHistoryServiceImpl implements BidHistoryService {
         else if(userService.getUserById(userId).isEmpty())
             return false;
 
-        bidHistory.getBids().add(new BidRecord(userId, getAuction().getAuctionId(), needsToPay, points, LocalDateTime.now()));
+        Bid newBid = new BidRecord(userId, getAuction().getAuctionId(), needsToPay, points, LocalDateTime.now());
+        highestBids.put(userId, newBid);
+        bidHistory.getBids().add(newBid);
         return true;
     }
 
