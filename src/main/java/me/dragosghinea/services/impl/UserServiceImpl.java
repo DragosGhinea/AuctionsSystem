@@ -1,7 +1,10 @@
 package me.dragosghinea.services.impl;
 
+import me.dragosghinea.exceptions.AuctionNotFound;
 import me.dragosghinea.model.UserDetails;
 import me.dragosghinea.model.Wallet;
+import me.dragosghinea.services.BlitzAuctionService;
+import me.dragosghinea.services.LongAuctionService;
 import me.dragosghinea.services.UserService;
 import me.dragosghinea.model.User;
 
@@ -11,6 +14,8 @@ import java.util.function.Predicate;
 public class UserServiceImpl implements UserService {
 
     private static final Map<UUID, User> users = new HashMap<>();
+    private BlitzAuctionService blitzAuctionService = new BlitzAuctionServiceImpl();
+    private LongAuctionService longAuctionService = new LongAuctionServiceImpl();
 
     @Override
     public Optional<User> getUserById(UUID uuid) {
@@ -72,7 +77,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean addAuctionToUser(UUID userId, UUID auctionId) {
+    public boolean addAuctionToUser(UUID userId, UUID auctionId) throws AuctionNotFound {
+        if(longAuctionService.getAuctionById(auctionId).isEmpty() && blitzAuctionService.getAuctionById(auctionId).isEmpty())
+            throw new AuctionNotFound(auctionId);
         return getUserById(userId)
                 .map(user -> user.getUserAuctions().getAuctions().add(auctionId))
                 .orElse(false);

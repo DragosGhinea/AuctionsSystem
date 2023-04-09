@@ -1,5 +1,6 @@
 package me.dragosghinea.services.impl;
 
+import me.dragosghinea.exceptions.IncompatibleReward;
 import me.dragosghinea.model.BundleReward;
 import me.dragosghinea.model.MultiReward;
 import me.dragosghinea.model.SingleReward;
@@ -75,14 +76,14 @@ public class RewardServiceImpl implements RewardService {
      * @return
      * true if the reward was in the list,
      * false if the reward was not found in the list
-     * or the auction reward is not a bundle
+     * @throws IncompatibleReward if reward is not a bundle
      */
     @Override
     public boolean removeReward(Reward reward) {
         if(reward instanceof BundleReward bundleReward)
             return bundleReward.getRewards().remove(reward);
 
-        return false;
+        throw new IncompatibleReward(auction.getReward().getClass(), BundleReward.class);
     }
 
     /**
@@ -117,10 +118,11 @@ public class RewardServiceImpl implements RewardService {
      * in a MultiReward
      *
      * @return
-     * false if auction reward not a bundle
+     * true if unpacked
+     * @throws IncompatibleReward if stored reward is not a bundle
      */
     @Override
-    public boolean transformUnbundle() {
+    public boolean transformUnbundle() throws IncompatibleReward {
         if(auction.getReward() instanceof BundleReward reward){
             MultiReward newReward = MultiReward.builder()
                     .rewardName(auction.getReward().getRewardName())
@@ -132,6 +134,6 @@ public class RewardServiceImpl implements RewardService {
             return true;
         }
 
-        return false;
+        throw new IncompatibleReward(auction.getReward().getClass(), BundleReward.class);
     }
 }

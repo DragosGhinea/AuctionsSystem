@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface AuctionService {
+public sealed interface AuctionService permits BlitzAuctionService, LongAuctionService {
 
     default boolean startAuction(Auction auction) {
         if (auction.getStartDate().isBefore(LocalDateTime.now()))

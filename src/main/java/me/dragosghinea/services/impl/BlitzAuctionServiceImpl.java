@@ -1,7 +1,7 @@
 package me.dragosghinea.services.impl;
 
+import me.dragosghinea.exceptions.IncompatibleAuction;
 import me.dragosghinea.model.BlitzAuction;
-import me.dragosghinea.model.LongAuction;
 import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.enums.AuctionState;
 import me.dragosghinea.services.BlitzAuctionService;
@@ -14,7 +14,7 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
     private final static Map<UUID, BlitzAuction> auctions = new HashMap<>();
 
     @Override
-    public boolean addAuction(Auction auction) {
+    public boolean addAuction(Auction auction) throws IncompatibleAuction {
         if(auction instanceof BlitzAuction blitzAuction) {
             return auctions.compute(auction.getAuctionId(), (key, value) -> {
                 if(value == null)
@@ -23,15 +23,16 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
                 return value;
             }) == blitzAuction;
         }
-        return false;
+        throw new IncompatibleAuction(auction.getClass(), BlitzAuction.class);
     }
 
     @Override
-    public boolean removeAuction(Auction auction) {
+    public boolean removeAuction(Auction auction) throws IncompatibleAuction{
         if(auction instanceof BlitzAuction blitzAuction) {
             return auctions.remove(auction.getAuctionId(), blitzAuction);
         }
-        return false;
+
+        throw new IncompatibleAuction(auction.getClass(), BlitzAuction.class);
     }
 
     @Override
