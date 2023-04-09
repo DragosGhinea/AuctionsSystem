@@ -1,5 +1,6 @@
 package me.dragosghinea.services.impl;
 
+import me.dragosghinea.exceptions.IncompatibleAuction;
 import me.dragosghinea.model.LongAuction;
 import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.enums.AuctionState;
@@ -13,7 +14,7 @@ public class LongAuctionServiceImpl implements LongAuctionService {
     private final static Map<UUID, LongAuction> auctions = new HashMap<>();
 
     @Override
-    public boolean addAuction(Auction auction) {
+    public boolean addAuction(Auction auction) throws IncompatibleAuction {
         if(auction instanceof LongAuction longAuction) {
             return auctions.compute(auction.getAuctionId(), (key, value) -> {
                 if(value == null)
@@ -22,7 +23,7 @@ public class LongAuctionServiceImpl implements LongAuctionService {
                 return value;
             }) == longAuction;
         }
-        return false;
+        throw new IncompatibleAuction(auction.getClass(), LongAuction.class);
     }
 
     @Override
@@ -30,7 +31,7 @@ public class LongAuctionServiceImpl implements LongAuctionService {
         if(auction instanceof LongAuction longAuction) {
             return auctions.remove(auction.getAuctionId(), longAuction);
         }
-        return false;
+        throw new IncompatibleAuction(auction.getClass(), LongAuction.class);
     }
 
     @Override

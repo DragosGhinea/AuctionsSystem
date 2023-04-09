@@ -1,5 +1,7 @@
 package me.dragosghinea.services.impl;
 
+import me.dragosghinea.exceptions.BidTooLow;
+import me.dragosghinea.exceptions.UserNotFound;
 import me.dragosghinea.model.BidHistory;
 import me.dragosghinea.model.BidRecord;
 import me.dragosghinea.model.User;
@@ -52,13 +54,14 @@ public class BidHistoryServiceImpl implements BidHistoryService {
     }
 
     @Override
-    public boolean addBid(UUID userId, BigDecimal points, boolean takePoints) {
+    public boolean addBid(UUID userId, BigDecimal points, boolean takePoints) throws BidTooLow, UserNotFound{
         if(points.compareTo(BigDecimal.ZERO)<0) {
             return false;
         }
 
-        if(getLatestBid().map(Bid::getTotalBidValue).orElse(BigDecimal.ZERO).compareTo(points)>=0) {
-            return false;
+        BigDecimal latest = getLatestBid().map(Bid::getTotalBidValue).orElse(BigDecimal.ZERO);
+        if(latest.compareTo(points)>=0) {
+            throw new BidTooLow(latest, points, userId);
         }
 
 
@@ -70,7 +73,10 @@ public class BidHistoryServiceImpl implements BidHistoryService {
 
 
         if(takePoints){
-            Boolean tookPoints = userService.getUserById(userId)
+            Optional<User> user = userService.getUserById(userId);
+            if(user.isEmpty())
+                throw new UserNotFound(userId);
+            Boolean tookPoints = user
                                     .map(User::getWallet)
                                     .map(wallet -> wallet.removePoints(needsToPay))
                                     .orElse(false);
@@ -80,7 +86,7 @@ public class BidHistoryServiceImpl implements BidHistoryService {
             }
         }
         else if(userService.getUserById(userId).isEmpty())
-            return false;
+            throw new UserNotFound(userId);
 
         Bid newBid = new BidRecord(userId, getAuction().getAuctionId(), needsToPay, points, LocalDateTime.now());
         highestBids.put(userId, newBid);
@@ -89,7 +95,7 @@ public class BidHistoryServiceImpl implements BidHistoryService {
     }
 
     @Override
-    public boolean addBid(UUID userId, BigDecimal amount, Currency currency, boolean takePoints) {
+    public boolean addBid(UUID userId, BigDecimal amount, Currency currency, boolean takePoints) throws BidTooLow, UserNotFound{
         return addBid(userId, currency.getPointsAmount(amount), takePoints);
     }
 
