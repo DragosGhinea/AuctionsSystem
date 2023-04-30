@@ -37,14 +37,7 @@ public class LoginMenu implements Menu {
             return;
         }
 
-        Predicate<User> searchCondition;
-        if (input.contains("@"))
-            searchCondition = (user) -> user.getUserDetails().getEmail().equalsIgnoreCase(input);
-        else
-            searchCondition = (user) -> user.getUserDetails().getUsername().equalsIgnoreCase(input);
-
-
-        userService.findFirstUser(searchCondition)
+        userService.getUserByUsernameOrEmail(input)
                 .ifPresentOrElse(
                         (userFound) -> user = userFound,
                         () -> getOutputSource().println("No user found!")
