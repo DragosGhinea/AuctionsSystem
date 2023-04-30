@@ -13,8 +13,8 @@ import java.util.UUID;
 @Setter
 public abstract class Reward {
 
+    private UUID rewardId;
     private String rewardName;
     private String rewardDescription;
-    private UUID auctionId;
     private RewardType rewardType = RewardType.UNKNOWN;
 }

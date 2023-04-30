@@ -17,6 +17,7 @@ public class User {
 
     public User(UserDetails details) {
         this.userDetails = (UserDetails) details.clone();
+        userDetails.setUserId(userId);
     }
 
     public User(UserDetails details, UserAuctions userAuctions){
