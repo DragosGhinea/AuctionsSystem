@@ -91,7 +91,7 @@ public class DatabaseConfigPostgre implements DatabaseConfig {
                 "    first_name TEXT NOT NULL," +
                 "    last_name TEXT NOT NULL," +
                 "    password_hash TEXT NOT NULL," +
-                "    CONSTRAINT _user_unique_fullname UNIQUE (first_name, last_name)" +
+                "    CONSTRAINT userdetails_unique_fullname UNIQUE (first_name, last_name)" +
                 ")";
 
         String walletSQL = "CREATE TABLE IF NOT EXISTS Wallet (" +
@@ -107,19 +107,21 @@ public class DatabaseConfigPostgre implements DatabaseConfig {
                 "    reward_type VARCHAR(20)" +
                 ")";
 
-        String blitzRewardSQL = "CREATE TABLE IF NOT EXISTS SingleReward(" +
+        String singleRewardSQL = "CREATE TABLE IF NOT EXISTS SingleReward(" +
                 "    reward_id UUID PRIMARY KEY REFERENCES Reward(reward_id) ON UPDATE CASCADE ON DELETE CASCADE," +
                 "    reward_info TEXT NOT NULL" +
                 ")";
 
         String multiRewardSQL = "CREATE TABLE IF NOT EXISTS MultiReward(" +
-                "    reward_id UUID PRIMARY KEY REFERENCES Reward(reward_id) ON UPDATE CASCADE ON DELETE CASCADE," +
-                "    reward_info TEXT NOT NULL" +
+                "    reward_id UUID REFERENCES Reward(reward_id) ON UPDATE CASCADE ON DELETE CASCADE," +
+                "    reward_info TEXT NOT NULL," +
+                "    PRIMARY KEY (reward_id, reward_info)" +
                 ")";
 
         String bundleRewardSQL = "CREATE TABLE IF NOT EXISTS BundleReward(" +
-                "    reward_id UUID PRIMARY KEY REFERENCES Reward(reward_id) ON UPDATE CASCADE ON DELETE CASCADE," +
+                "    reward_id UUID REFERENCES Reward(reward_id) ON UPDATE CASCADE ON DELETE CASCADE," +
                 "    included_reward_id UUID REFERENCES Reward(reward_id) ON UPDATE CASCADE ON DELETE CASCADE," +
+                "    PRIMARY KEY (reward_id, included_reward_id)," +
                 "    CHECK (reward_id <> included_reward_id)" +
                 ")";
 
@@ -136,13 +138,13 @@ public class DatabaseConfigPostgre implements DatabaseConfig {
 
         String blitzAuctionSQL = "CREATE TABLE IF NOT EXISTS BlitzAuction(" +
                 "    auction_id UUID PRIMARY KEY REFERENCES Auction(auction_id) ON UPDATE CASCADE ON DELETE CASCADE," +
-                "    bid_duration INTERVAL NOT NULL," +
-                "    preparing_duration INTERVAL NOT NULL" +
+                "    bid_duration BIGINT NOT NULL," +
+                "    preparing_duration BIGINT NOT NULL" +
                 ")";
 
-        String longAuctionSQL = "CREATE TABLE IF NOT EXISTS BlitzAuction(" +
+        String longAuctionSQL = "CREATE TABLE IF NOT EXISTS LongAuction(" +
                 "    auction_id UUID PRIMARY KEY REFERENCES Auction(auction_id) ON UPDATE CASCADE ON DELETE CASCADE," +
-                "    extend_time INTERVAL NOT NULL," +
+                "    extend_time BIGINT NOT NULL," +
                 "    overtime TIMESTAMP" +
                 ")";
 
@@ -155,6 +157,30 @@ public class DatabaseConfigPostgre implements DatabaseConfig {
                 "    PRIMARY KEY (user_id, auction_id, bid_date)" +
                 ")";
 
+
+        String bundleRewardFunctionCreate = """
+                CREATE OR REPLACE FUNCTION get_bundle_reward_info(reward_id_param UUID)
+                RETURNS TABLE(reward_id UUID, reward_name TEXT, reward_description TEXT, reward_type TEXT, reward_info TEXT) AS $$
+                DECLARE
+                    included_reward_ids UUID[];
+                BEGIN
+                    SELECT ARRAY(SELECT included_reward_id FROM BundleReward c WHERE c.reward_id = reward_id_param) INTO included_reward_ids;
+
+                    RETURN QUERY (
+                        SELECT reward_id, reward_name, reward_description, reward_type, reward_info
+                        FROM Reward a
+                        LEFT JOIN SingleReward b ON a.reward_id = b.reward_id
+                        WHERE a.reward_id = ANY(included_reward_ids)
+                        UNION
+                        SELECT reward_id, reward_name, reward_description, reward_type, STRING_AGG(reward_info, E'\\t')
+                        FROM Reward a
+                        LEFT JOIN MultiReward b ON a.reward_id = b.reward_id
+                        WHERE a.reward_id = ANY(included_reward_ids)
+                        GROUP BY reward_id, reward_name, reward_description, reward_type
+                    );
+                END;
+                $$ LANGUAGE plpgsql;""";
+
         try(
                 Connection conn = DatabaseConnection.getConnection();
                 Statement create = conn.createStatement()
@@ -162,13 +188,15 @@ public class DatabaseConfigPostgre implements DatabaseConfig {
             create.addBatch(usersSQL);
             create.addBatch(walletSQL);
             create.addBatch(rewardSQL);
-            create.addBatch(blitzRewardSQL);
+            create.addBatch(singleRewardSQL);
             create.addBatch(multiRewardSQL);
             create.addBatch(bundleRewardSQL);
             create.addBatch(auctionSQL);
             create.addBatch(blitzAuctionSQL);
             create.addBatch(longAuctionSQL);
             create.addBatch(bidsSQL);
+
+            create.addBatch(bundleRewardFunctionCreate);
 
             create.executeBatch();
         }

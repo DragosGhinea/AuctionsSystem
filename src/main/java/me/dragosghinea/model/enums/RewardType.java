@@ -2,7 +2,7 @@ package me.dragosghinea.model.enums;
 
 public enum RewardType {
     SINGLE("Single", "A singular item reward."),
-    MULTIPLE("Multiple", "A reward that consists of multiple items."),
+    MULTI("Multiple", "A reward that consists of multiple items."),
     BUNDLE("Bundle", "A reward that consists of more rewards."),
     UNKNOWN("Unknown", "No specification on this reward.");
 

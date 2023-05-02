@@ -39,7 +39,7 @@ public class AuctionViewMenu implements Menu{
     @Override
     public void receiveInput(String input) {
         OPTION op = OPTION.getById(input);
-        auction.setAuctionState(auctionService.getActualState(auction));
+        auctionService.updateAuction(auction);
 
         switch (op) {
             case PLACE_BID -> {
@@ -65,7 +65,7 @@ public class AuctionViewMenu implements Menu{
                             break;
                         }
 
-                        auction.setAuctionState(auctionService.getActualState(auction));
+                        auctionService.updateAuctionState(auction);
                         if(auction.getAuctionState().equals(AuctionState.ENDED) || auction.getAuctionState().equals(AuctionState.CANCELLED)){
                             getOutputSource().println("This auction can no longer receive bids!");
                             break;
@@ -79,8 +79,19 @@ public class AuctionViewMenu implements Menu{
                         try {
                             if (bidHistoryService.addBid(user.getUserId(), amount, true)) {
                                 user.getUserAuctions().getAuctions().add(auction.getAuctionId());
-                                if (auction instanceof BlitzAuction blitzAuction)
+                                if (auction instanceof BlitzAuction blitzAuction) {
                                     blitzAuction.setEndDate(LocalDateTime.now().plus(blitzAuction.getBidDuration()));
+                                    auctionService.updateAuction(auction);
+                                }
+                                else if(auction instanceof LongAuction longAuction){
+                                    //overtime is initially equal to the end date,
+                                    //end date is guaranteed to be after the current time,
+                                    //we extend the overtime by the extendTime if a bid is placed in the last 30 minutes
+                                    if(LocalDateTime.now().plusMinutes(30).isAfter(longAuction.getOverTime())){
+                                        longAuction.setOverTime(longAuction.getOverTime().plus(longAuction.getExtendTime()));
+                                        auctionService.updateAuction(longAuction);
+                                    }
+                                }
                             } else {
                                 getOutputSource().println("The bid couldn't be placed! Are you sure you have the money?");
                             }
@@ -131,7 +142,7 @@ public class AuctionViewMenu implements Menu{
             auctionService = new LongAuctionServiceImpl();
         }
 
-        auction.setAuctionState(auctionService.getActualState(auction));
+        auctionService.updateAuctionState(auction);
 
         Menu.super.start();
     }

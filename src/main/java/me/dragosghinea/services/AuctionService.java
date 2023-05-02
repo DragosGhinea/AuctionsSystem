@@ -9,21 +9,9 @@ import java.util.UUID;
 
 public sealed interface AuctionService permits BlitzAuctionService, LongAuctionService {
 
-    default boolean startAuction(Auction auction) {
-        if (auction.getStartDate().isBefore(LocalDateTime.now()))
-            return false;
+    boolean startAuction(Auction auction);
 
-        auction.setStartDate(LocalDateTime.now());
-        return false;
-    }
-
-    default boolean cancelAuction(Auction auction) {
-        if (auction.getAuctionState().equals(AuctionState.CANCELLED))
-            return false;
-
-        auction.setAuctionState(AuctionState.CANCELLED);
-        return true;
-    }
+    boolean cancelAuction(Auction auction);
 
     Optional<? extends Auction> getAuctionById(UUID auctionId);
 
@@ -35,4 +23,7 @@ public sealed interface AuctionService permits BlitzAuctionService, LongAuctionS
 
     AuctionState getActualState(Auction auction);
 
+    AuctionState updateAuctionState(Auction auction);
+
+    boolean updateAuction(Auction auction);
 }

@@ -3,10 +3,8 @@ package me.dragosghinea.services;
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.UserDetails;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 public interface UserService {
 

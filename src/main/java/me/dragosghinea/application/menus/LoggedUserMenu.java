@@ -73,8 +73,8 @@ public class LoggedUserMenu implements Menu {
                 }
             }
             case BROWSE_MOST_BIDS -> {
-                List<Auction> union = new ArrayList<>(blitzAuctionService.getAuctions(a -> true));
-                union.addAll(longAuctionService.getAuctions(a -> true));
+                List<Auction> union = new ArrayList<>(blitzAuctionService.getAuctions());
+                union.addAll(longAuctionService.getAuctions());
                 new AuctionsBrowseMenu(
                         user,
                         union,
@@ -83,8 +83,8 @@ public class LoggedUserMenu implements Menu {
                 ).start();
             }
             case BROWSE_HIGHEST_BID -> {
-                List<Auction> union = new ArrayList<>(blitzAuctionService.getAuctions(a -> true));
-                union.addAll(longAuctionService.getAuctions(a -> true));
+                List<Auction> union = new ArrayList<>(blitzAuctionService.getAuctions());
+                union.addAll(longAuctionService.getAuctions());
                 new AuctionsBrowseMenu(
                         user,
                         union,
@@ -98,7 +98,7 @@ public class LoggedUserMenu implements Menu {
                 ).start();
             }
             case BROWSE_END_SOON -> {
-                List<Auction> union = new ArrayList<>(longAuctionService.getAuctions(a -> true));
+                List<Auction> union = new ArrayList<>(longAuctionService.getAuctions());
                 new AuctionsBrowseMenu(
                         user,
                         union,

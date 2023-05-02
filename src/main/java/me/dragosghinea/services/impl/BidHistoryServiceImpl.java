@@ -8,6 +8,8 @@ import me.dragosghinea.model.User;
 import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.abstracts.Bid;
 import me.dragosghinea.model.enums.Currency;
+import me.dragosghinea.repository.BidHistoryRepository;
+import me.dragosghinea.repository.impl.postgres.BidHistoryRepositoryImpl;
 import me.dragosghinea.services.BidHistoryService;
 import me.dragosghinea.services.UserService;
 
@@ -18,8 +20,8 @@ import java.util.*;
 public class BidHistoryServiceImpl implements BidHistoryService {
     private final BidHistory bidHistory;
     private final UserService userService = new UserServiceImpl();
-
     private final Map<UUID, Bid> highestBids = new LinkedHashMap<>();
+    private final BidHistoryRepository bidHistoryRepository = new BidHistoryRepositoryImpl();
 
     public BidHistoryServiceImpl(BidHistory bidHistory){
         this.bidHistory = bidHistory;
@@ -91,6 +93,7 @@ public class BidHistoryServiceImpl implements BidHistoryService {
         Bid newBid = new BidRecord(userId, getAuction().getAuctionId(), needsToPay, points, LocalDateTime.now());
         highestBids.put(userId, newBid);
         bidHistory.getBids().add(newBid);
+        bidHistoryRepository.addBid(newBid);
         return true;
     }
 
@@ -128,6 +131,7 @@ public class BidHistoryServiceImpl implements BidHistoryService {
                    return value;
             });
 
+            bidHistoryRepository.removeBid(bid);
             return true;
         }
 
@@ -154,6 +158,7 @@ public class BidHistoryServiceImpl implements BidHistoryService {
                 return false;
         }
         bidHistory.getBids().removeIf(bid -> bid.getUserId().equals(userId));
+        bidHistoryRepository.removeAllBidsForUser(getAuction().getAuctionId(), userId);
         return true;
     }
 

@@ -20,6 +20,6 @@ public non-sealed interface LongAuctionService extends AuctionService {
     @Override
     Optional<LongAuction> getAuctionById(UUID auctionId);
 
-    List<LongAuction> getAuctions(Predicate<LongAuction> check);
+    List<LongAuction> getAuctions();
 
 }

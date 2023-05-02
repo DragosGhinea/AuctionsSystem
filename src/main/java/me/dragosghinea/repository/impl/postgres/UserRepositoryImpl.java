@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class UserRepositoryImpl implements UserRepository {
+    private final UserMapper userMapper = UserMapper.getInstance();
 
     @Override
     public Optional<User> getUserByEmail(String email){
@@ -24,7 +25,7 @@ public class UserRepositoryImpl implements UserRepository {
                 PreparedStatement stmt = conn.prepareStatement(sql)
         ) {
             stmt.setObject(1, email);
-            UserDetails details = UserMapper.getInstance().mapToUserDetails(stmt.executeQuery());
+            UserDetails details = userMapper.mapToUserDetails(stmt.executeQuery());
             if(details == null)
                 return Optional.empty();
 
@@ -44,7 +45,7 @@ public class UserRepositoryImpl implements UserRepository {
                 PreparedStatement stmt = conn.prepareStatement(sql)
         ) {
             stmt.setObject(1, username);
-            UserDetails details = UserMapper.getInstance().mapToUserDetails(stmt.executeQuery());
+            UserDetails details = userMapper.mapToUserDetails(stmt.executeQuery());
             if(details == null)
                 return Optional.empty();
 
@@ -107,7 +108,7 @@ public class UserRepositoryImpl implements UserRepository {
                 PreparedStatement stmt = conn.prepareStatement(sql)
         ) {
             stmt.setObject(1, id);
-            UserDetails details = UserMapper.getInstance().mapToUserDetails(stmt.executeQuery());
+            UserDetails details = userMapper.mapToUserDetails(stmt.executeQuery());
             if(details == null)
                 return Optional.empty();
 

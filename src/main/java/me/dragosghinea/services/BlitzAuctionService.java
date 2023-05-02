@@ -20,6 +20,6 @@ public non-sealed interface BlitzAuctionService extends AuctionService {
     @Override
     Optional<BlitzAuction> getAuctionById(UUID auctionId);
 
-    List<BlitzAuction> getAuctions(Predicate<BlitzAuction> check);
+    List<BlitzAuction> getAuctions();
 
 }
