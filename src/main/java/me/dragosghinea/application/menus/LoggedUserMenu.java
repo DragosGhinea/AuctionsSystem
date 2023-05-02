@@ -54,22 +54,13 @@ public class LoggedUserMenu implements Menu {
                 getOutputSource().println("---------------------------------");
             }
             case VIEW_BID_AUCTIONS -> {
-                Iterator<UUID> auctionIdIterator = user.getUserAuctions().getAuctions().iterator();
-                if (!auctionIdIterator.hasNext())
+                List<Auction> auctions = userService.getUserAuctions(user.getUserId());
+                if(auctions.isEmpty()) {
                     getOutputSource().println("You have not bid on any auction yet!");
+                }
                 else {
-                    while (auctionIdIterator.hasNext()) {
-                        UUID auctionId = auctionIdIterator.next();
-                        longAuctionService.getAuctionById(auctionId).ifPresentOrElse(
-                                (auction) -> getOutputSource().println(auction),
-                                () -> {
-                                    blitzAuctionService.getAuctionById(auctionId).ifPresentOrElse(
-                                            (auction) -> getOutputSource().println(auction),
-                                            auctionIdIterator::remove
-                                    );
-                                }
-                        );
-                    }
+                    for (Auction auction : auctions)
+                        getOutputSource().println(auction);
                 }
             }
             case BROWSE_MOST_BIDS -> {

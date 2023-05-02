@@ -1,7 +1,6 @@
 package me.dragosghinea.repository;
 
 import me.dragosghinea.model.abstracts.Auction;
-import me.dragosghinea.model.abstracts.Bid;
 import me.dragosghinea.model.enums.AuctionState;
 
 import java.util.List;
@@ -17,6 +16,8 @@ public interface AuctionRepository<T extends Auction> {
     boolean updateAuction(T auction);
 
     Optional<T> getAuctionById(UUID auctionId);
+
+    List<T> getAuctionsByIds(List<UUID> auctionIds);
 
     List<T> getAllAuctions();
 

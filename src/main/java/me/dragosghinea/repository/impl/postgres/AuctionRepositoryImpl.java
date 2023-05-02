@@ -1,6 +1,7 @@
 package me.dragosghinea.repository.impl.postgres;
 
 import me.dragosghinea.config.DatabaseConnection;
+import me.dragosghinea.mapper.AuctionMapper;
 import me.dragosghinea.model.BlitzAuction;
 import me.dragosghinea.model.LongAuction;
 import me.dragosghinea.model.abstracts.Auction;
@@ -16,6 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class AuctionRepositoryImpl implements AuctionRepository<Auction> {
+    private final AuctionMapper auctionMapper = AuctionMapper.getInstance();
     private final AuctionRepository<BlitzAuction> blitzAuctionAuctionRepository = new BlitzAuctionRepositoryImpl();
     private final AuctionRepository<LongAuction> longAuctionAuctionRepository = new LongAuctionRepositoryImpl();
     @Override
@@ -110,5 +112,26 @@ public class AuctionRepositoryImpl implements AuctionRepository<Auction> {
         }
 
         return false;
+    }
+
+    @Override
+    public List<Auction> getAuctionsByIds(List<UUID> auctionIds) {
+        List<Auction> toReturn = new ArrayList<>();
+
+        String sql = "SELECT * FROM Auction a LEFT JOIN BlitzAuction b ON a.auction_id = b.auction_id " +
+                "LEFT JOIN LongAuction l ON a.auction_id = l.auction_id " +
+                "WHERE a.auction_id IN (?)";
+
+        try(
+                Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)
+        ) {
+            stmt.setArray(1, conn.createArrayOf("UUID", auctionIds.toArray()));
+            toReturn.addAll(auctionMapper.mapToAuctionList(stmt.executeQuery()));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return toReturn;
     }
 }

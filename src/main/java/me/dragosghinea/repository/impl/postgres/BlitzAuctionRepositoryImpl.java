@@ -180,4 +180,23 @@ public class BlitzAuctionRepositoryImpl implements AuctionRepository<BlitzAuctio
 
         return false;
     }
+
+    @Override
+    public List<BlitzAuction> getAuctionsByIds(List<UUID> auctionIds) {
+        String sql = "SELECT * FROM Auction a LEFT JOIN BlitzAuction b ON a.auction_id = b.auction_id WHERE a.auction_id IN (?) AND a.auction_type = ?";
+
+        try(
+                Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)
+        ) {
+            stmt.setArray(1, conn.createArrayOf("uuid", auctionIds.toArray()));
+            stmt.setString(2, "Blitz");
+
+            return auctionMapper.mapToBlitzAuctionList(stmt.executeQuery());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>();
+    }
 }

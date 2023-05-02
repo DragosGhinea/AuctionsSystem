@@ -157,6 +157,12 @@ public class DatabaseConfigPostgre implements DatabaseConfig {
                 "    PRIMARY KEY (user_id, auction_id, bid_date)" +
                 ")";
 
+        String userAuctionsSQL = "CREATE TABLE IF NOT EXISTS UserAuctions(" +
+                "    user_id UUID REFERENCES UserDetails(user_id) ON UPDATE CASCADE ON DELETE CASCADE," +
+                "    auction_id UUID REFERENCES Auction(auction_id) ON UPDATE CASCADE ON DELETE CASCADE," +
+                "    PRIMARY KEY (user_id, auction_id)" +
+                ")";
+
 
         String bundleRewardFunctionCreate = """
                 CREATE OR REPLACE FUNCTION get_bundle_reward_info(reward_id_param UUID)
@@ -195,6 +201,7 @@ public class DatabaseConfigPostgre implements DatabaseConfig {
             create.addBatch(blitzAuctionSQL);
             create.addBatch(longAuctionSQL);
             create.addBatch(bidsSQL);
+            create.addBatch(userAuctionsSQL);
 
             create.addBatch(bundleRewardFunctionCreate);
 

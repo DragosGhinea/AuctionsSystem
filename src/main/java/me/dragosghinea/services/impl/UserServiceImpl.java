@@ -3,12 +3,14 @@ package me.dragosghinea.services.impl;
 import me.dragosghinea.exceptions.AuctionNotFound;
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.UserDetails;
+import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.repository.UserRepository;
 import me.dragosghinea.repository.impl.postgres.UserRepositoryImpl;
 import me.dragosghinea.services.BlitzAuctionService;
 import me.dragosghinea.services.LongAuctionService;
 import me.dragosghinea.services.UserService;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -54,17 +56,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean addAuctionToUser(UUID userId, UUID auctionId) throws AuctionNotFound {
-        if(longAuctionService.getAuctionById(auctionId).isEmpty() && blitzAuctionService.getAuctionById(auctionId).isEmpty())
-            throw new AuctionNotFound(auctionId);
-        return getUserById(userId)
-                .map(user -> user.getUserAuctions().getAuctions().add(auctionId))
-                .orElse(false);
+        return userRepository.addAuctionToUser(userId, auctionId);
     }
 
     @Override
     public boolean removeAuctionFromUser(UUID userId, UUID auctionId) {
-        return getUserById(userId)
-                .map(user -> user.getUserAuctions().getAuctions().remove(auctionId))
-                .orElse(false);
+        return userRepository.removeAuctionFromUser(userId, auctionId);
+    }
+
+    @Override
+    public List<Auction> getUserAuctions(UUID userId) {
+        return userRepository.getUserAuctions(userId);
     }
 }

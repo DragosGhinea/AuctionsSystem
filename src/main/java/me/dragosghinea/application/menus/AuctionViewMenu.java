@@ -9,9 +9,11 @@ import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.enums.AuctionState;
 import me.dragosghinea.services.AuctionService;
 import me.dragosghinea.services.BidHistoryService;
+import me.dragosghinea.services.UserService;
 import me.dragosghinea.services.impl.BidHistoryServiceImpl;
 import me.dragosghinea.services.impl.BlitzAuctionServiceImpl;
 import me.dragosghinea.services.impl.LongAuctionServiceImpl;
+import me.dragosghinea.services.impl.UserServiceImpl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,6 +31,8 @@ public class AuctionViewMenu implements Menu{
     private final User user;
     private final BidHistoryService bidHistoryService;
     private AuctionService auctionService;
+
+    private final UserService userService = new UserServiceImpl();
 
     public AuctionViewMenu(User user, Auction auction) {
         this.user = user;
@@ -78,7 +82,7 @@ public class AuctionViewMenu implements Menu{
 
                         try {
                             if (bidHistoryService.addBid(user.getUserId(), amount, true)) {
-                                user.getUserAuctions().getAuctions().add(auction.getAuctionId());
+                                userService.addAuctionToUser(user.getUserId(), auction.getAuctionId());
                                 if (auction instanceof BlitzAuction blitzAuction) {
                                     blitzAuction.setEndDate(LocalDateTime.now().plus(blitzAuction.getBidDuration()));
                                     auctionService.updateAuction(auction);
@@ -97,6 +101,7 @@ public class AuctionViewMenu implements Menu{
                             }
                         }
                         catch(UserNotFound x){
+                            x.printStackTrace();
                             getOutputSource().println("For some reason, you were not found in the database.");
                         }
                         catch(BidTooLow x){
@@ -120,7 +125,7 @@ public class AuctionViewMenu implements Menu{
                     getOutputSource().println("Nothing to remove.");
                 }
                 else{
-                    user.getUserAuctions().getAuctions().remove(auction.getAuctionId());
+                    userService.removeAuctionFromUser(user.getUserId(), auction.getAuctionId());
                 }
             }
             default -> {

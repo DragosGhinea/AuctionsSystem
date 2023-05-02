@@ -2,7 +2,9 @@ package me.dragosghinea.services;
 
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.UserDetails;
+import me.dragosghinea.model.abstracts.Auction;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,4 +22,6 @@ public interface UserService {
     boolean addAuctionToUser(UUID userId, UUID auctionId);
 
     boolean removeAuctionFromUser(UUID userId, UUID auctionId);
+
+    List<Auction> getUserAuctions(UUID userId);
 }

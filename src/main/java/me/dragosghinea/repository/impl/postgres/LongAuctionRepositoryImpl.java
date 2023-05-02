@@ -76,7 +76,7 @@ public class LongAuctionRepositoryImpl implements AuctionRepository<LongAuction>
     @Override
     public boolean updateAuction(LongAuction auction) {
         String auctionUpdateSql = "UPDATE Auction SET start_date = ?, end_date = ?, auction_state = ?, starting_bid_amount = ?, minimum_bid_gap = ?, reward_id = ? WHERE auction_id = ?";
-        String longAuctionUpdateSql = "UPDATE LongAuction SET bid_duration = ?, preparing_duration = ? WHERE auction_id = ?";
+        String longAuctionUpdateSql = "UPDATE LongAuction SET extend_time = ?, overtime = ? WHERE auction_id = ?";
 
         try(
                 Connection conn = DatabaseConnection.getConnection();
@@ -181,5 +181,24 @@ public class LongAuctionRepositoryImpl implements AuctionRepository<LongAuction>
         }
 
         return false;
+    }
+
+    @Override
+    public List<LongAuction> getAuctionsByIds(List<UUID> auctionIds) {
+        String sql = "SELECT * FROM Auction a LEFT JOIN LongAuction b ON a.auction_id = b.auction_id WHERE a.auction_id IN (?) AND a.auction_type = ?";
+
+        try(
+                Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)
+        ) {
+            stmt.setArray(1, conn.createArrayOf("uuid", auctionIds.toArray()));
+            stmt.setString(2, "Long");
+
+            return auctionMapper.mapToLongAuctionList(stmt.executeQuery());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>();
     }
 }

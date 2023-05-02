@@ -2,6 +2,7 @@ package me.dragosghinea.mapper;
 
 import me.dragosghinea.model.BlitzAuction;
 import me.dragosghinea.model.LongAuction;
+import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.abstracts.Reward;
 import me.dragosghinea.model.enums.AuctionState;
 import me.dragosghinea.repository.RewardRepository;
@@ -85,6 +86,19 @@ public class AuctionMapper {
 
         while(set.next()){
             auctions.add(directMapToLongAuction(set));
+        }
+
+        return auctions;
+    }
+
+    public List<Auction> mapToAuctionList(ResultSet set) throws SQLException {
+        List<Auction> auctions = new ArrayList<>();
+
+        while(set.next()){
+            if(set.getString("auction_type").equals("Blitz"))
+                auctions.add(directMapToBlitzAuction(set));
+            else
+                auctions.add(directMapToLongAuction(set));
         }
 
         return auctions;
