@@ -8,6 +8,8 @@ import me.dragosghinea.model.User;
 import me.dragosghinea.model.UserDetails;
 import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.repository.UserRepository;
+import me.dragosghinea.repository.WalletRepository;
+import me.dragosghinea.model.enums.Currency;
 
 import java.sql.*;
 import java.sql.Date;
@@ -16,6 +18,8 @@ import java.util.*;
 public class UserRepositoryImpl implements UserRepository {
     private final UserMapper userMapper = UserMapper.getInstance();
     private final AuctionMapper auctionMapper = AuctionMapper.getInstance();
+
+    private final WalletRepository walletRepository = new WalletRepositoryImpl();
 
     @Override
     public Optional<User> getUserByEmail(String email){
@@ -32,6 +36,7 @@ public class UserRepositoryImpl implements UserRepository {
 
             User user = new User(details);
             user.getUserAuctions().setAuctions(getUserAuctionIds(user.getUserId()));
+            user.setWallet(walletRepository.getWallet(user.getUserId()).orElse(null));
             return Optional.of(user);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -54,6 +59,7 @@ public class UserRepositoryImpl implements UserRepository {
 
             User user = new User(details);
             user.getUserAuctions().setAuctions(getUserAuctionIds(user.getUserId()));
+            user.setWallet(walletRepository.getWallet(user.getUserId()).orElse(null));
             return Optional.of(user);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -66,12 +72,16 @@ public class UserRepositoryImpl implements UserRepository {
         String sql = "INSERT INTO UserDetails (user_id, email, username, birth_date, first_name, last_name, password_hash) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
+        String sqlWallet = "INSERT INTO Wallet (user_id, points, preferred_currency) VALUES (?, ?, ?)";
+
         UserDetails details = user.getUserDetails();
 
         try(
                 Connection conn = DatabaseConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                PreparedStatement stmtWallet = conn.prepareStatement(sqlWallet)
         ){
+            conn.setAutoCommit(false);
             stmt.setObject(1, details.getUserId()); // set user_id
             stmt.setString(2, details.getEmail()); // set email
             stmt.setString(3, details.getUsername()); // set username
@@ -81,6 +91,14 @@ public class UserRepositoryImpl implements UserRepository {
             stmt.setString(7, details.getPasswordHash()); // set password_hash
 
             stmt.executeUpdate();
+
+            stmtWallet.setObject(1, details.getUserId()); // set user_id
+            stmtWallet.setBigDecimal(2, user.getWallet().getPoints()); // set points
+            stmtWallet.setString(3, user.getWallet().getPreferredCurrency().getCurrencyName()); // set preferred_currency
+
+            stmtWallet.executeUpdate();
+
+            conn.commit();
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -119,6 +137,7 @@ public class UserRepositoryImpl implements UserRepository {
 
             User user = new User(details);
             user.getUserAuctions().setAuctions(getUserAuctionIds(user.getUserId()));
+            user.setWallet(walletRepository.getWallet(user.getUserId()).orElse(null));
             return Optional.of(user);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -171,7 +190,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public boolean addAuctionToUser(UUID userId, UUID auctionId) {
-        String sql = "INSERT INTO UserAuction (user_id, auction_id) VALUES (?, ?)";
+        String sql = "INSERT INTO UserAuctions (user_id, auction_id) VALUES (?, ?)";
 
         try(
                 Connection conn = DatabaseConnection.getConnection();

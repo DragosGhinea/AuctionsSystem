@@ -11,7 +11,7 @@ public class User {
     private UUID userId = UUID.randomUUID();
 
     @Setter
-    private Wallet wallet = new Wallet(this);
+    private Wallet wallet;
     private UserAuctions userAuctions = new UserAuctions();
 
     private UserDetails userDetails;
@@ -31,6 +31,7 @@ public class User {
             userDetails.setUserId(userId);
         else
             userId = userDetails.getUserId();
+        wallet = new Wallet(this.userId);
     }
 
     public User(UserDetails details, UserAuctions userAuctions){
@@ -40,6 +41,7 @@ public class User {
         else
             userId = userDetails.getUserId();
         this.userAuctions = userAuctions;
+        wallet = new Wallet(this.userId);
     }
 
     public void setUserDetails(UserDetails details){

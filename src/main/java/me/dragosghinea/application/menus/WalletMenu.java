@@ -2,6 +2,8 @@ package me.dragosghinea.application.menus;
 
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.enums.Currency;
+import me.dragosghinea.services.WalletService;
+import me.dragosghinea.services.impl.WalletServiceImpl;
 
 import java.math.BigDecimal;
 import java.util.Scanner;
@@ -9,6 +11,7 @@ import java.util.Scanner;
 public class WalletMenu implements Menu{
 
     private final Scanner scanner = new Scanner(System.in);
+    private final WalletService walletService;
 
     @Override
     public Scanner getInputSource() {
@@ -18,6 +21,7 @@ public class WalletMenu implements Menu{
 
     public WalletMenu(User user) {
         this.user = user;
+        walletService = new WalletServiceImpl(user.getWallet());
     }
 
     @Override
@@ -35,7 +39,7 @@ public class WalletMenu implements Menu{
                 while(true){
                     try{
                         Currency newPref = Currency.valueOf(currencyName.toUpperCase());
-                        user.getWallet().setPreferredCurrency(newPref);
+                        walletService.setPreferredCurrency(newPref);
                         break;
                     }catch(IllegalArgumentException x){
                         getOutputSource().println("Currency not found! Reenter:");
@@ -74,7 +78,7 @@ public class WalletMenu implements Menu{
                     }
                 }
 
-                user.getWallet().addPoints(currency.getPointsAmount(toAdd));
+                walletService.addPointsToWallet(currency.getPointsAmount(toAdd));
             }
             case WITHDRAW -> {
                 getOutputSource().println("Your password: ");
@@ -110,7 +114,7 @@ public class WalletMenu implements Menu{
                         }
                     }
 
-                    if(!user.getWallet().removePoints(currency.getPointsAmount(toRemove)))
+                    if(!walletService.removePointsFromWallet(currency.getPointsAmount(toRemove)))
                         getOutputSource().println("Not enough points to withdraw!");
                 }
                 else{

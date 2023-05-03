@@ -12,6 +12,7 @@ import me.dragosghinea.repository.BidHistoryRepository;
 import me.dragosghinea.repository.impl.postgres.BidHistoryRepositoryImpl;
 import me.dragosghinea.services.BidHistoryService;
 import me.dragosghinea.services.UserService;
+import me.dragosghinea.services.WalletService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -80,7 +81,10 @@ public class BidHistoryServiceImpl implements BidHistoryService {
                 throw new UserNotFound(userId);
             Boolean tookPoints = user
                                     .map(User::getWallet)
-                                    .map(wallet -> wallet.removePoints(needsToPay))
+                                    .map(wallet -> {
+                                        WalletService walletService = new WalletServiceImpl(wallet);
+                                        return walletService.removePointsFromWallet(needsToPay);
+                                    })
                                     .orElse(false);
 
             if(!tookPoints) {

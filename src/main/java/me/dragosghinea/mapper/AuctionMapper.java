@@ -1,5 +1,6 @@
 package me.dragosghinea.mapper;
 
+import me.dragosghinea.model.BidHistory;
 import me.dragosghinea.model.BlitzAuction;
 import me.dragosghinea.model.LongAuction;
 import me.dragosghinea.model.abstracts.Auction;
@@ -20,17 +21,15 @@ public class AuctionMapper {
     private final static AuctionMapper auctionMapper = new AuctionMapper();
     private final RewardRepository<Reward> rewardRepository = new RewardRepositoryImpl();
 
-    private AuctionMapper() {
-    }
+    private AuctionMapper() {}
 
-    ;
 
     public static AuctionMapper getInstance() {
         return auctionMapper;
     }
 
     private BlitzAuction directMapToBlitzAuction(ResultSet set) throws SQLException {
-        return new BlitzAuction().toBuilder()
+        BlitzAuction auction = new BlitzAuction().toBuilder()
                 .auctionId(set.getObject("auction_id", UUID.class))
                 .startDate(set.getTimestamp("start_date").toLocalDateTime())
                 .endDate(set.getTimestamp("end_date").toLocalDateTime())
@@ -41,10 +40,13 @@ public class AuctionMapper {
                 .bidDuration(Duration.ofSeconds(set.getLong("bid_duration")))
                 .preparingDuration(Duration.ofSeconds(set.getLong("preparing_duration")))
                 .build();
+
+        auction.setBidHistory(new BidHistory(auction));
+        return auction;
     }
 
     private LongAuction directMapToLongAuction(ResultSet set) throws SQLException {
-        return new LongAuction().toBuilder()
+        LongAuction auction =  new LongAuction().toBuilder()
                 .auctionId(set.getObject("auction_id", UUID.class))
                 .startDate(set.getTimestamp("start_date").toLocalDateTime())
                 .endDate(set.getTimestamp("end_date").toLocalDateTime())
@@ -55,6 +57,8 @@ public class AuctionMapper {
                 .extendTime(Duration.ofSeconds(set.getLong("extend_time")))
                 .overTime(set.getTimestamp("overtime").toLocalDateTime())
                 .build();
+        auction.setBidHistory(new BidHistory(auction));
+        return auction;
     }
 
     public BlitzAuction mapToBlitzAuction(ResultSet set) throws SQLException {
