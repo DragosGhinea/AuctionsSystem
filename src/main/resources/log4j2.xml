@@ -1,0 +1,34 @@
+<Configuration>
+    <Appenders>
+
+        <RollingFile name="CSV" fileName="logs/log.csv"
+                     filePattern="logs/log-%d{yyyy-MM-dd}.csv"
+                     ignoreExceptions="false">
+            <!-- was initial choice, but I can not include level and timestamp directly in the csv file
+            <CsvParameterLayout delimiter="," header="actionName, details, byWho, logType, timestamp\n" />
+            -->
+            <!-- another unsuccessful attempt due to it removing csv formatter
+            <PatternLayout header="actionName, details, byWho, logType, timestamp\n" pattern="%msg, %p, %d{yyyy-MM-dd HH:mm:ss.SSS}%n" />
+            -->
+            <CustomCsvEventLayout header="actionName, details, byWho, logType, timestamp\n" />
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="me.dragosghinea.services.impl.AuditServiceImpl" level="info" additivity="false">
+            <AppenderRef ref="CSV"/>
+        </Logger>
+
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

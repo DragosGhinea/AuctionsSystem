@@ -9,10 +9,10 @@ import me.dragosghinea.model.User;
 import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.abstracts.Reward;
 import me.dragosghinea.services.AuctionService;
-import me.dragosghinea.services.AuctionRewardsManagerService;
 import me.dragosghinea.services.RewardService;
 import me.dragosghinea.services.UserService;
 import me.dragosghinea.services.impl.*;
+import org.apache.logging.log4j.Level;
 
 import java.sql.SQLException;
 import java.util.List;
