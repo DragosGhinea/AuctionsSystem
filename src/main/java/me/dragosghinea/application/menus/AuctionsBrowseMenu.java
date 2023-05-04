@@ -2,6 +2,9 @@ package me.dragosghinea.application.menus;
 
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.abstracts.Auction;
+import me.dragosghinea.services.AuditService;
+import me.dragosghinea.services.enums.AuditAction;
+import me.dragosghinea.services.impl.AuditServiceImpl;
 
 import java.util.*;
 
@@ -22,7 +25,10 @@ public class AuctionsBrowseMenu implements Menu {
     private int page = 0;
     private final Comparator<Auction> comparator;
 
+    private static final AuditService auditService = AuditServiceImpl.getInstance();
+
     public AuctionsBrowseMenu(User user, Collection<Auction> auctions, Comparator<Auction> comparator, String sortName) {
+        auditService.logInfoAction(AuditAction.AUCTION_BROWSING, "User "+user.getUserDetails().getUsername()+" is browsing auctions with sorting "+sortName, user.getUserDetails().getUsername());
         this.user = user;
         this.auctions = new ArrayList<>(auctions);
         this.comparator = comparator;

@@ -2,6 +2,9 @@ package me.dragosghinea.application.menus;
 
 import me.dragosghinea.model.UserDetails;
 import me.dragosghinea.repository.impl.postgres.UserRepositoryImpl;
+import me.dragosghinea.services.AuditService;
+import me.dragosghinea.services.enums.AuditAction;
+import me.dragosghinea.services.impl.AuditServiceImpl;
 import me.dragosghinea.services.impl.UserServiceImpl;
 
 import java.text.ParseException;
@@ -15,6 +18,7 @@ import java.util.Scanner;
 public class CreateUserMenu implements Menu{
 
     private final Scanner scanner = new Scanner(System.in);
+    private static final AuditService auditService = AuditServiceImpl.getInstance();
 
     @Override
     public Scanner getInputSource() {
@@ -96,6 +100,7 @@ public class CreateUserMenu implements Menu{
                         getOutputSource().println("Could not create the user! It might have the same email or username as someone else.");
                     }
                     else{
+                        auditService.logInfoAction(AuditAction.USER_CREATE_ACCOUNT, "New user "+details.getUsername()+" has created an account!", "Register Menu");
                         getOutputSource().println("User has been created successfully!");
                     }
                     shouldExit = true;

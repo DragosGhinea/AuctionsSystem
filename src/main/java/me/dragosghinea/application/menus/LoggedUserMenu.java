@@ -6,20 +6,27 @@ import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.repository.impl.postgres.BlitzAuctionRepositoryImpl;
 import me.dragosghinea.repository.impl.postgres.LongAuctionRepositoryImpl;
 import me.dragosghinea.repository.impl.postgres.UserRepositoryImpl;
+import me.dragosghinea.services.AuditService;
 import me.dragosghinea.services.BlitzAuctionService;
 import me.dragosghinea.services.LongAuctionService;
 import me.dragosghinea.services.UserService;
+import me.dragosghinea.services.enums.AuditAction;
+import me.dragosghinea.services.impl.AuditServiceImpl;
 import me.dragosghinea.services.impl.BlitzAuctionServiceImpl;
 import me.dragosghinea.services.impl.LongAuctionServiceImpl;
 import me.dragosghinea.services.impl.UserServiceImpl;
 
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Scanner;
 
 public class LoggedUserMenu implements Menu {
 
     private final Scanner scanner = new Scanner(System.in);
+    private static final AuditService auditService = AuditServiceImpl.getInstance();
 
     @Override
     public Scanner getInputSource() {
@@ -39,6 +46,11 @@ public class LoggedUserMenu implements Menu {
     @Override
     public boolean shouldExit() {
         return shouldExit;
+    }
+
+    @Override
+    public void onExit() {
+        auditService.logInfoAction(AuditAction.USER_LOGOUT, "User "+user.getUserDetails().getUsername()+" logged out!", user.getUserDetails().getUsername());
     }
 
     @Override
@@ -105,11 +117,13 @@ public class LoggedUserMenu implements Menu {
             }
             case DELETE_ACCOUNT -> {
                 if (userService.removeUser(user)) {
+                    auditService.logInfoAction(AuditAction.USER_DELETE_ACCOUNT, "User "+user.getUserDetails().getUsername()+" deleted their account!", user.getUserDetails().getUsername());
                     getOutputSource().println("The account was successfully removed!");
                     shouldExit = true;
-                } else
+                } else {
+                    auditService.logErrorAction(AuditAction.USER_ERROR, "User "+user.getUserDetails().getUsername()+" tried to delete their account but failed.", user.getUserDetails().getUsername());
                     getOutputSource().println("Could not remove the account!");
-
+                }
             }
             default -> {
                 getOutputSource().println("Unknown option '" + input + "'!");

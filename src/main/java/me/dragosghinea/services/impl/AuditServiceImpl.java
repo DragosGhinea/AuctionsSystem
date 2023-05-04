@@ -8,7 +8,16 @@ import org.apache.logging.log4j.Logger;
 
 
 public class AuditServiceImpl implements AuditService {
-    private static final Logger logger = LogManager.getLogger(AuditServiceImpl.class);
+    private static final AuditServiceImpl instance = new AuditServiceImpl(LogManager.getLogger(AuditServiceImpl.class));
+
+    public static AuditServiceImpl getInstance() {
+        return instance;
+    }
+
+    private AuditServiceImpl(Logger logger){
+        this.logger = logger;
+    }
+    private final Logger logger;
 
     @Override
     public void logAction(AuditAction action, String details, String byWho, Level logLevel) {

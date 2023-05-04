@@ -3,9 +3,12 @@ package me.dragosghinea.services.enums;
 public enum AuditAction {
 
     AUCTION_STATE_CHANGE,
+    AUCTION_BROWSING,
     BID_PLACE,
     BID_WITHDRAW,
     USER_LOGIN,
+    USER_CREATE_ACCOUNT,
+    USER_DELETE_ACCOUNT,
     USER_LOGOUT,
     PREFERRED_CURRENCY_CHANGE,
     MONEY_DEPOSIT,

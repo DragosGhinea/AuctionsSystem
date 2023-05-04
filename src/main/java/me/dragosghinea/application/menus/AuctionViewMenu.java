@@ -12,12 +12,11 @@ import me.dragosghinea.repository.impl.postgres.BlitzAuctionRepositoryImpl;
 import me.dragosghinea.repository.impl.postgres.LongAuctionRepositoryImpl;
 import me.dragosghinea.repository.impl.postgres.UserRepositoryImpl;
 import me.dragosghinea.services.AuctionService;
+import me.dragosghinea.services.AuditService;
 import me.dragosghinea.services.BidHistoryService;
 import me.dragosghinea.services.UserService;
-import me.dragosghinea.services.impl.BidHistoryServiceImpl;
-import me.dragosghinea.services.impl.BlitzAuctionServiceImpl;
-import me.dragosghinea.services.impl.LongAuctionServiceImpl;
-import me.dragosghinea.services.impl.UserServiceImpl;
+import me.dragosghinea.services.enums.AuditAction;
+import me.dragosghinea.services.impl.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -38,7 +37,13 @@ public class AuctionViewMenu implements Menu{
 
     private final UserService userService = new UserServiceImpl(new UserRepositoryImpl());
 
+    private static final AuditService auditService = AuditServiceImpl.getInstance();
+
     public AuctionViewMenu(User user, Auction auction) {
+        auditService.logInfoAction(AuditAction.AUCTION_BROWSING,
+                "User "+user.getUserDetails().getUsername()+" is currently checking out the auction with ID "+auction.getAuctionId(),
+                user.getUserDetails().getUsername()
+        );
         this.user = user;
         this.auction = auction;
         bidHistoryService = new BidHistoryServiceImpl(
@@ -104,15 +109,29 @@ public class AuctionViewMenu implements Menu{
                                         auctionService.updateAuction(longAuction);
                                     }
                                 }
+                                auditService.logInfoAction(
+                                        AuditAction.BID_PLACE,
+                                        "User "+user.getUserDetails().getUsername()+" has placed a bid of "+amount+" points" +
+                                                "on the auction with ID "+auction.getAuctionId(),
+                                        user.getUserDetails().getUsername()
+                                );
                             } else {
+                                auditService.logWarnAction(
+                                        AuditAction.BID_PLACE,
+                                        "User "+user.getUserDetails().getUsername()+" has tried to place a bid of "+amount+" points" +
+                                                "on the auction with ID "+auction.getAuctionId()+" but failed.",
+                                        user.getUserDetails().getUsername()
+                                );
                                 getOutputSource().println("The bid couldn't be placed! Are you sure you have the money?");
                             }
                         }
                         catch(UserNotFound x){
                             x.printStackTrace();
+                            auditService.logFatalAction(AuditAction.USER_ERROR, "User "+user.getUserDetails().getUsername()+" was not found in the database, even though they are logged in.");
                             getOutputSource().println("For some reason, you were not found in the database.");
                         }
                         catch(BidTooLow x){
+                            auditService.logWarnAction(AuditAction.BID_PLACE, x.getMessage(), user.getUserDetails().getUsername());
                             getOutputSource().println(x.getMessage());
                         }
 
@@ -133,6 +152,11 @@ public class AuctionViewMenu implements Menu{
                     getOutputSource().println("Nothing to remove.");
                 }
                 else{
+                    auditService.logInfoAction(
+                            AuditAction.BID_WITHDRAW,
+                            "User "+user.getUserDetails().getUsername()+" has withdrawn all bids on auction with ID "+auction.getAuctionId(),
+                            user.getUserDetails().getUsername()
+                    );
                     userService.removeAuctionFromUser(user.getUserId(), auction.getAuctionId());
                 }
             }

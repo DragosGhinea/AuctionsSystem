@@ -3,7 +3,10 @@ package me.dragosghinea.application.menus;
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.enums.Currency;
 import me.dragosghinea.repository.impl.postgres.WalletRepositoryImpl;
+import me.dragosghinea.services.AuditService;
 import me.dragosghinea.services.WalletService;
+import me.dragosghinea.services.enums.AuditAction;
+import me.dragosghinea.services.impl.AuditServiceImpl;
 import me.dragosghinea.services.impl.WalletServiceImpl;
 
 import java.math.BigDecimal;
@@ -13,6 +16,8 @@ public class WalletMenu implements Menu{
 
     private final Scanner scanner = new Scanner(System.in);
     private final WalletService walletService;
+
+    private static final AuditService auditService = AuditServiceImpl.getInstance();
 
     @Override
     public Scanner getInputSource() {
@@ -41,8 +46,18 @@ public class WalletMenu implements Menu{
                     try{
                         Currency newPref = Currency.valueOf(currencyName.toUpperCase());
                         walletService.setPreferredCurrency(newPref);
+                        auditService.logInfoAction(
+                                AuditAction.PREFERRED_CURRENCY_CHANGE,
+                                "User "+user.getUserDetails().getUsername()+" has changed their preferred currency to "+newPref.getCurrencyName(),
+                                user.getUserDetails().getUsername()
+                        );
                         break;
                     }catch(IllegalArgumentException x){
+                        auditService.logInfoAction(
+                                AuditAction.PREFERRED_CURRENCY_CHANGE,
+                                "User "+user.getUserDetails().getUsername()+" has tried changing their preferred currency to unknown: "+currencyName,
+                                user.getUserDetails().getUsername()
+                        );
                         getOutputSource().println("Currency not found! Reenter:");
                         currencyName = getInputSource().nextLine();
                     }
@@ -79,6 +94,7 @@ public class WalletMenu implements Menu{
                     }
                 }
 
+                auditService.logInfoAction(AuditAction.MONEY_DEPOSIT, "User "+user.getUserDetails().getUsername()+" has deposit "+toAdd+" points.", user.getUserDetails().getUsername());
                 walletService.addPointsToWallet(currency.getPointsAmount(toAdd));
             }
             case WITHDRAW -> {
@@ -115,10 +131,16 @@ public class WalletMenu implements Menu{
                         }
                     }
 
-                    if(!walletService.removePointsFromWallet(currency.getPointsAmount(toRemove)))
+                    if(!walletService.removePointsFromWallet(currency.getPointsAmount(toRemove))) {
+                        auditService.logWarnAction(AuditAction.MONEY_WITHDRAW, "User "+user.getUserDetails().getUsername()+" tried to withdraw "+toRemove+" points with insufficient balance.", user.getUserDetails().getUsername());
                         getOutputSource().println("Not enough points to withdraw!");
+                    }
+                    else{
+                        auditService.logInfoAction(AuditAction.MONEY_WITHDRAW, "User "+user.getUserDetails().getUsername()+" has withdrawn "+toRemove+" points.", user.getUserDetails().getUsername());
+                    }
                 }
                 else{
+                    auditService.logWarnAction(AuditAction.MONEY_WITHDRAW, "User "+user.getUserDetails().getUsername()+" wanted to withdraw but introduced a wrong password.", user.getUserDetails().getUsername());
                     getOutputSource().println("Incorrect password!");
                 }
             }
