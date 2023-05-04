@@ -8,11 +8,17 @@ import me.dragosghinea.model.BundleReward;
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.abstracts.Reward;
+import me.dragosghinea.repository.impl.postgres.BlitzAuctionRepositoryImpl;
+import me.dragosghinea.repository.impl.postgres.LongAuctionRepositoryImpl;
+import me.dragosghinea.repository.impl.postgres.RewardRepositoryImpl;
+import me.dragosghinea.repository.impl.postgres.UserRepositoryImpl;
 import me.dragosghinea.services.AuctionService;
 import me.dragosghinea.services.RewardService;
 import me.dragosghinea.services.UserService;
-import me.dragosghinea.services.impl.*;
-import org.apache.logging.log4j.Level;
+import me.dragosghinea.services.impl.BlitzAuctionServiceImpl;
+import me.dragosghinea.services.impl.LongAuctionServiceImpl;
+import me.dragosghinea.services.impl.RewardServiceImpl;
+import me.dragosghinea.services.impl.UserServiceImpl;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -28,15 +34,15 @@ public class Main {
         }
 
         //loading default users
-        UserService userService = new UserServiceImpl();
+        UserService userService = new UserServiceImpl(new UserRepositoryImpl());
         for (User u : DefaultEntitiesGenerator.getDefaultUsers()) {
             userService.addUser(u);
         }
 
         //loading default auctions
-        RewardService rewardService = new RewardServiceImpl();
-        AuctionService auctionServiceBlitz = new BlitzAuctionServiceImpl();
-        AuctionService auctionServiceLong = new LongAuctionServiceImpl();
+        RewardService rewardService = new RewardServiceImpl(new RewardRepositoryImpl());
+        AuctionService auctionServiceBlitz = new BlitzAuctionServiceImpl(new BlitzAuctionRepositoryImpl());
+        AuctionService auctionServiceLong = new LongAuctionServiceImpl(new LongAuctionRepositoryImpl());
 
         List<Auction> auctionList = DefaultEntitiesGenerator.getDefaultAuctions();
 

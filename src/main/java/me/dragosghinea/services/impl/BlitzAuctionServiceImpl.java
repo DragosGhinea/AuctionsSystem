@@ -1,19 +1,21 @@
 package me.dragosghinea.services.impl;
 
+import lombok.RequiredArgsConstructor;
 import me.dragosghinea.exceptions.IncompatibleAuction;
 import me.dragosghinea.model.BlitzAuction;
 import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.enums.AuctionState;
 import me.dragosghinea.repository.AuctionRepository;
-import me.dragosghinea.repository.impl.postgres.BlitzAuctionRepositoryImpl;
 import me.dragosghinea.services.BlitzAuctionService;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.function.Predicate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
+@RequiredArgsConstructor
 public class BlitzAuctionServiceImpl implements BlitzAuctionService {
-    private final AuctionRepository<BlitzAuction> auctionRepository = new BlitzAuctionRepositoryImpl();
+    private final AuctionRepository<BlitzAuction> auctionRepository;
 
     @Override
     public boolean startAuction(Auction auction) {

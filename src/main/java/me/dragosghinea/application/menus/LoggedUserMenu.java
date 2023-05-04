@@ -3,6 +3,9 @@ package me.dragosghinea.application.menus;
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.UserDetails;
 import me.dragosghinea.model.abstracts.Auction;
+import me.dragosghinea.repository.impl.postgres.BlitzAuctionRepositoryImpl;
+import me.dragosghinea.repository.impl.postgres.LongAuctionRepositoryImpl;
+import me.dragosghinea.repository.impl.postgres.UserRepositoryImpl;
 import me.dragosghinea.services.BlitzAuctionService;
 import me.dragosghinea.services.LongAuctionService;
 import me.dragosghinea.services.UserService;
@@ -25,9 +28,9 @@ public class LoggedUserMenu implements Menu {
 
     private final User user;
     private boolean shouldExit;
-    private final LongAuctionService longAuctionService = new LongAuctionServiceImpl();
-    private final BlitzAuctionService blitzAuctionService = new BlitzAuctionServiceImpl();
-    private final UserService userService = new UserServiceImpl();
+    private final LongAuctionService longAuctionService = new LongAuctionServiceImpl(new LongAuctionRepositoryImpl());
+    private final BlitzAuctionService blitzAuctionService = new BlitzAuctionServiceImpl(new BlitzAuctionRepositoryImpl());
+    private final UserService userService = new UserServiceImpl(new UserRepositoryImpl());
 
     public LoggedUserMenu(User user) {
         this.user = user;

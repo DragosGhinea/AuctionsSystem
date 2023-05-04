@@ -1,24 +1,20 @@
 package me.dragosghinea.services.impl;
 
+import lombok.RequiredArgsConstructor;
 import me.dragosghinea.exceptions.AuctionNotFound;
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.UserDetails;
 import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.repository.UserRepository;
-import me.dragosghinea.repository.impl.postgres.UserRepositoryImpl;
-import me.dragosghinea.services.BlitzAuctionService;
-import me.dragosghinea.services.LongAuctionService;
 import me.dragosghinea.services.UserService;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private UserRepository userRepository = new UserRepositoryImpl();
-
-    private BlitzAuctionService blitzAuctionService = new BlitzAuctionServiceImpl();
-    private LongAuctionService longAuctionService = new LongAuctionServiceImpl();
+    private final UserRepository userRepository;
 
     @Override
     public Optional<User> getUserById(UUID uuid) {

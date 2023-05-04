@@ -1,11 +1,11 @@
 package me.dragosghinea.application.menus;
 
 import me.dragosghinea.model.User;
+import me.dragosghinea.repository.impl.postgres.UserRepositoryImpl;
 import me.dragosghinea.services.UserService;
 import me.dragosghinea.services.impl.UserServiceImpl;
 
 import java.util.Scanner;
-import java.util.function.Predicate;
 
 public class LoginMenu implements Menu {
 
@@ -17,7 +17,7 @@ public class LoginMenu implements Menu {
     }
 
     private boolean shouldExit = false;
-    private final UserService userService = new UserServiceImpl();
+    private final UserService userService = new UserServiceImpl(new UserRepositoryImpl());
     private User user;
 
     @Override

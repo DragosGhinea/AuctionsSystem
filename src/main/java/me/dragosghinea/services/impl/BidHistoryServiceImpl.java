@@ -9,7 +9,8 @@ import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.abstracts.Bid;
 import me.dragosghinea.model.enums.Currency;
 import me.dragosghinea.repository.BidHistoryRepository;
-import me.dragosghinea.repository.impl.postgres.BidHistoryRepositoryImpl;
+import me.dragosghinea.repository.WalletRepository;
+import me.dragosghinea.repository.impl.postgres.WalletRepositoryImpl;
 import me.dragosghinea.services.BidHistoryService;
 import me.dragosghinea.services.UserService;
 import me.dragosghinea.services.WalletService;
@@ -20,12 +21,14 @@ import java.util.*;
 
 public class BidHistoryServiceImpl implements BidHistoryService {
     private final BidHistory bidHistory;
-    private final UserService userService = new UserServiceImpl();
+    private final UserService userService;
     private final Map<UUID, Bid> highestBids = new LinkedHashMap<>();
-    private final BidHistoryRepository bidHistoryRepository = new BidHistoryRepositoryImpl();
+    private final BidHistoryRepository bidHistoryRepository;
 
-    public BidHistoryServiceImpl(BidHistory bidHistory){
+    public BidHistoryServiceImpl(BidHistory bidHistory, UserService userService, BidHistoryRepository bidHistoryRepository){
         this.bidHistory = bidHistory;
+        this.userService = userService;
+        this.bidHistoryRepository = bidHistoryRepository;
         bidHistory.getBids().forEach(bid -> highestBids.put(bid.getUserId(), bid));
     }
 
@@ -79,10 +82,11 @@ public class BidHistoryServiceImpl implements BidHistoryService {
             Optional<User> user = userService.getUserById(userId);
             if(user.isEmpty())
                 throw new UserNotFound(userId);
+            final WalletRepository walletRepository = new WalletRepositoryImpl();
             Boolean tookPoints = user
                                     .map(User::getWallet)
                                     .map(wallet -> {
-                                        WalletService walletService = new WalletServiceImpl(wallet);
+                                        WalletService walletService = new WalletServiceImpl(walletRepository, wallet);
                                         return walletService.removePointsFromWallet(needsToPay);
                                     })
                                     .orElse(false);

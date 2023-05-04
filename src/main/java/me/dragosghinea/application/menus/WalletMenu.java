@@ -2,6 +2,7 @@ package me.dragosghinea.application.menus;
 
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.enums.Currency;
+import me.dragosghinea.repository.impl.postgres.WalletRepositoryImpl;
 import me.dragosghinea.services.WalletService;
 import me.dragosghinea.services.impl.WalletServiceImpl;
 
@@ -21,7 +22,7 @@ public class WalletMenu implements Menu{
 
     public WalletMenu(User user) {
         this.user = user;
-        walletService = new WalletServiceImpl(user.getWallet());
+        walletService = new WalletServiceImpl(new WalletRepositoryImpl(), user.getWallet());
     }
 
     @Override

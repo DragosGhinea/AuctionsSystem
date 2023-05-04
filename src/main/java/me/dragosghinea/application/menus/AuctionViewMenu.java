@@ -7,6 +7,10 @@ import me.dragosghinea.model.LongAuction;
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.enums.AuctionState;
+import me.dragosghinea.repository.impl.postgres.BidHistoryRepositoryImpl;
+import me.dragosghinea.repository.impl.postgres.BlitzAuctionRepositoryImpl;
+import me.dragosghinea.repository.impl.postgres.LongAuctionRepositoryImpl;
+import me.dragosghinea.repository.impl.postgres.UserRepositoryImpl;
 import me.dragosghinea.services.AuctionService;
 import me.dragosghinea.services.BidHistoryService;
 import me.dragosghinea.services.UserService;
@@ -32,12 +36,16 @@ public class AuctionViewMenu implements Menu{
     private final BidHistoryService bidHistoryService;
     private AuctionService auctionService;
 
-    private final UserService userService = new UserServiceImpl();
+    private final UserService userService = new UserServiceImpl(new UserRepositoryImpl());
 
     public AuctionViewMenu(User user, Auction auction) {
         this.user = user;
         this.auction = auction;
-        bidHistoryService = new BidHistoryServiceImpl(auction.getBidHistory());
+        bidHistoryService = new BidHistoryServiceImpl(
+                    auction.getBidHistory(),
+                    userService,
+                    new BidHistoryRepositoryImpl()
+                );
     }
 
     @Override
@@ -137,14 +145,14 @@ public class AuctionViewMenu implements Menu{
     @Override
     public void start() {
         if(auction instanceof BlitzAuction){
-            auctionService = new BlitzAuctionServiceImpl();
+            auctionService = new BlitzAuctionServiceImpl(new BlitzAuctionRepositoryImpl());
             AuctionState state = auctionService.getActualState(auction);
             if(!state.equals(AuctionState.PREPARING) && !state.equals(AuctionState.ENDED)){
                 getOutputSource().println("You can only join a blitz auction if it's preparing or ended.");
             }
         }
         else{
-            auctionService = new LongAuctionServiceImpl();
+            auctionService = new LongAuctionServiceImpl(new LongAuctionRepositoryImpl());
         }
 
         auctionService.updateAuctionState(auction);

@@ -1,11 +1,11 @@
 package me.dragosghinea.services.impl;
 
+import lombok.RequiredArgsConstructor;
 import me.dragosghinea.exceptions.IncompatibleAuction;
 import me.dragosghinea.model.LongAuction;
 import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.enums.AuctionState;
 import me.dragosghinea.repository.AuctionRepository;
-import me.dragosghinea.repository.impl.postgres.LongAuctionRepositoryImpl;
 import me.dragosghinea.services.LongAuctionService;
 
 import java.time.LocalDateTime;
@@ -13,8 +13,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 public class LongAuctionServiceImpl implements LongAuctionService {
-    private final static AuctionRepository<LongAuction> auctionRepository = new LongAuctionRepositoryImpl();
+    private final AuctionRepository<LongAuction> auctionRepository;
 
     @Override
     public boolean startAuction(Auction auction) {

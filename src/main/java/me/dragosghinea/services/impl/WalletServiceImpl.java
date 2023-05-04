@@ -1,20 +1,17 @@
 package me.dragosghinea.services.impl;
 
+import lombok.RequiredArgsConstructor;
 import me.dragosghinea.model.Wallet;
 import me.dragosghinea.model.enums.Currency;
 import me.dragosghinea.repository.WalletRepository;
-import me.dragosghinea.repository.impl.postgres.WalletRepositoryImpl;
 import me.dragosghinea.services.WalletService;
 
 import java.math.BigDecimal;
 
+@RequiredArgsConstructor
 public class WalletServiceImpl implements WalletService {
-    private final WalletRepository walletRepository = new WalletRepositoryImpl();
+    private final WalletRepository walletRepository;
     private final Wallet wallet;
-
-    public WalletServiceImpl(Wallet wallet) {
-        this.wallet = wallet;
-    }
 
     @Override
     public boolean addPointsToWallet(BigDecimal points) {

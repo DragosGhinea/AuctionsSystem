@@ -1,7 +1,7 @@
 package me.dragosghinea.services.impl;
 
+import lombok.RequiredArgsConstructor;
 import me.dragosghinea.exceptions.IncompatibleReward;
-import me.dragosghinea.model.BlitzAuction;
 import me.dragosghinea.model.BundleReward;
 import me.dragosghinea.model.MultiReward;
 import me.dragosghinea.model.SingleReward;
@@ -10,20 +10,13 @@ import me.dragosghinea.model.abstracts.Reward;
 import me.dragosghinea.model.enums.RewardType;
 import me.dragosghinea.repository.AuctionRepository;
 import me.dragosghinea.repository.RewardRepository;
-import me.dragosghinea.repository.impl.postgres.AuctionRepositoryImpl;
-import me.dragosghinea.repository.impl.postgres.BlitzAuctionRepositoryImpl;
-import me.dragosghinea.repository.impl.postgres.RewardRepositoryImpl;
 import me.dragosghinea.services.AuctionRewardsManagerService;
 
+@RequiredArgsConstructor
 public class AuctionRewardsManagerServiceImpl implements AuctionRewardsManagerService {
     private final Auction auction;
-    private final RewardRepository<Reward> rewardRepository = new RewardRepositoryImpl();
-    private final AuctionRepository<Auction> auctionRepository = new AuctionRepositoryImpl();
-
-
-    public AuctionRewardsManagerServiceImpl(Auction auction){
-        this.auction = auction;
-    }
+    private final RewardRepository<Reward> rewardRepository;
+    private final AuctionRepository<Auction> auctionRepository;
 
     @Override
     public boolean setReward(Reward reward) {
