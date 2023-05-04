@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class AuctionRepositoryImpl implements AuctionRepository<Auction> {
-    private final AuctionMapper auctionMapper = AuctionMapper.getInstance();
+    private final static AuctionMapper auctionMapper = AuctionMapper.getInstance();
     private final AuctionRepository<BlitzAuction> blitzAuctionAuctionRepository = new BlitzAuctionRepositoryImpl();
     private final AuctionRepository<LongAuction> longAuctionAuctionRepository = new LongAuctionRepositoryImpl();
     @Override

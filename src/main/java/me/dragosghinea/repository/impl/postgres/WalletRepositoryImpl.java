@@ -2,8 +2,6 @@ package me.dragosghinea.repository.impl.postgres;
 
 import me.dragosghinea.config.DatabaseConnection;
 import me.dragosghinea.mapper.WalletMapper;
-import me.dragosghinea.model.User;
-import me.dragosghinea.model.UserDetails;
 import me.dragosghinea.model.Wallet;
 import me.dragosghinea.model.enums.Currency;
 import me.dragosghinea.repository.WalletRepository;
@@ -16,7 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class WalletRepositoryImpl implements WalletRepository {
-    private final WalletMapper walletMapper = WalletMapper.getInstance();
+    private static final WalletMapper walletMapper = WalletMapper.getInstance();
 
     @Override
     public Optional<Wallet> getWallet(UUID userId) {

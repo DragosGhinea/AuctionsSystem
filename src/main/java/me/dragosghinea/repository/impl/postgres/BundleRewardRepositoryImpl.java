@@ -4,7 +4,6 @@ import me.dragosghinea.config.DatabaseConnection;
 import me.dragosghinea.exceptions.DatabaseBundleRewardException;
 import me.dragosghinea.mapper.RewardMapper;
 import me.dragosghinea.model.BundleReward;
-import me.dragosghinea.model.MultiReward;
 import me.dragosghinea.model.abstracts.Reward;
 import me.dragosghinea.repository.RewardRepository;
 
@@ -13,7 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class BundleRewardRepositoryImpl implements RewardRepository<BundleReward> {
-    private final RewardMapper rewardMapper = RewardMapper.getInstance();
+    private static final RewardMapper rewardMapper = RewardMapper.getInstance();
 
     @Override
     public boolean addReward(BundleReward reward) {

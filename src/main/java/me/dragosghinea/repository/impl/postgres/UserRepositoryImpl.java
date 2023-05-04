@@ -9,15 +9,14 @@ import me.dragosghinea.model.UserDetails;
 import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.repository.UserRepository;
 import me.dragosghinea.repository.WalletRepository;
-import me.dragosghinea.model.enums.Currency;
 
-import java.sql.*;
 import java.sql.Date;
+import java.sql.*;
 import java.util.*;
 
 public class UserRepositoryImpl implements UserRepository {
-    private final UserMapper userMapper = UserMapper.getInstance();
-    private final AuctionMapper auctionMapper = AuctionMapper.getInstance();
+    private static final UserMapper userMapper = UserMapper.getInstance();
+    private static final AuctionMapper auctionMapper = AuctionMapper.getInstance();
 
     private final WalletRepository walletRepository = new WalletRepositoryImpl();
 

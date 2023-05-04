@@ -1,7 +1,6 @@
 package me.dragosghinea.repository;
 
 import me.dragosghinea.model.User;
-import me.dragosghinea.model.UserDetails;
 import me.dragosghinea.model.abstracts.Auction;
 
 import java.util.List;

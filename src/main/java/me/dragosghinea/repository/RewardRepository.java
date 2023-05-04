@@ -2,7 +2,6 @@ package me.dragosghinea.repository;
 
 import me.dragosghinea.model.abstracts.Reward;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 

@@ -9,7 +9,6 @@ import me.dragosghinea.repository.RewardRepository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 

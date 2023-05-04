@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 public class BidHistoryRepositoryImpl implements BidHistoryRepository {
-    private final BidMapper bidMapper = BidMapper.getInstance();
+    private static final BidMapper bidMapper = BidMapper.getInstance();
 
     @Override
     public boolean addBid(Bid bid) {

@@ -3,7 +3,6 @@ package me.dragosghinea.repository.impl.postgres;
 import me.dragosghinea.config.DatabaseConnection;
 import me.dragosghinea.mapper.AuctionMapper;
 import me.dragosghinea.model.LongAuction;
-import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.enums.AuctionState;
 import me.dragosghinea.repository.AuctionRepository;
 
@@ -17,7 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class LongAuctionRepositoryImpl implements AuctionRepository<LongAuction> {
-    private final AuctionMapper auctionMapper = AuctionMapper.getInstance();
+    private static final AuctionMapper auctionMapper = AuctionMapper.getInstance();
 
     @Override
     public boolean addAuction(LongAuction auction) {

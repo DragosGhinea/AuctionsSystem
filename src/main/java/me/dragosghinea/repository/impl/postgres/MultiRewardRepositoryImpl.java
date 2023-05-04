@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class MultiRewardRepositoryImpl implements RewardRepository<MultiReward> {
-    private final RewardMapper rewardMapper = RewardMapper.getInstance();
+    private static final RewardMapper rewardMapper = RewardMapper.getInstance();
 
     @Override
     public boolean addReward(MultiReward reward) {

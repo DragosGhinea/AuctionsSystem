@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class BlitzAuctionRepositoryImpl implements AuctionRepository<BlitzAuction> {
-    private final AuctionMapper auctionMapper = AuctionMapper.getInstance();
+    private static final AuctionMapper auctionMapper = AuctionMapper.getInstance();
 
     @Override
     public boolean addAuction(BlitzAuction auction) {
