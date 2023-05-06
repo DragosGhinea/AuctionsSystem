@@ -9,7 +9,7 @@ to provide an efficient connection pool.
 
 ## Database Diagram
 
-![DatabaseDiagram](https://github.com/DragosGhinea/AuctionsSystem/blob/main/DatabaseDiagram.svg)
+![DatabaseDiagram](https://github.com/DragosGhinea/AuctionsSystem/blob/Stage2/DatabaseDiagram.svg)
 
 ## Audit Service | CSV storage
 
