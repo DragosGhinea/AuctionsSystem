@@ -7,6 +7,8 @@ import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.enums.AuctionState;
 import me.dragosghinea.repository.AuctionRepository;
 import me.dragosghinea.services.LongAuctionService;
+import me.dragosghinea.services.updater.InMemoryAuctionStateUpdaterImpl;
+import me.dragosghinea.services.updater.StateChangeEventData;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,6 +37,8 @@ public class LongAuctionServiceImpl implements LongAuctionService {
         if (auction.getAuctionState().equals(AuctionState.CANCELLED))
             return false;
 
+        StateChangeEventData stateChangeEventData = new StateChangeEventData(auction.getAuctionId(), auction.getAuctionState(), AuctionState.CANCELLED, "Long", auction);
+        InMemoryAuctionStateUpdaterImpl.getInstance().notifyObservers(stateChangeEventData);
         auction.setAuctionState(AuctionState.CANCELLED);
         auctionRepository.setState(auction.getAuctionId(), AuctionState.CANCELLED);
         return true;
@@ -43,6 +47,7 @@ public class LongAuctionServiceImpl implements LongAuctionService {
     @Override
     public boolean addAuction(Auction auction) throws IncompatibleAuction {
         if(auction instanceof LongAuction longAuction) {
+            InMemoryAuctionStateUpdaterImpl.getInstance().addAuctionToCheck(longAuction);
             return auctionRepository.addAuction(longAuction);
         }
         throw new IncompatibleAuction(auction.getClass(), LongAuction.class);
@@ -51,6 +56,7 @@ public class LongAuctionServiceImpl implements LongAuctionService {
     @Override
     public boolean removeAuction(Auction auction) {
         if(auction instanceof LongAuction longAuction) {
+            InMemoryAuctionStateUpdaterImpl.getInstance().removeAuctionToCheck(longAuction);
             return auctionRepository.removeAuctionById(longAuction.getAuctionId());
         }
         throw new IncompatibleAuction(auction.getClass(), LongAuction.class);
@@ -58,10 +64,12 @@ public class LongAuctionServiceImpl implements LongAuctionService {
 
     @Override
     public boolean removeAuction(UUID auctionId) {
+        InMemoryAuctionStateUpdaterImpl.getInstance().removeAuctionToCheck(auctionId);
         return auctionRepository.removeAuctionById(auctionId);
     }
 
     @Override
+    @Deprecated // the update should be done automatically by the AuctionStateUpdater
     public AuctionState updateAuctionState(Auction auction) {
         AuctionState old = auction.getAuctionState();
         AuctionState newState = getActualState(auction);
@@ -112,14 +120,14 @@ public class LongAuctionServiceImpl implements LongAuctionService {
         if(auction == null)
             return Optional.empty();
 
-        updateAuctionState(auction);
+        InMemoryAuctionStateUpdaterImpl.getInstance().addAuctionToCheck(auction);
         return Optional.of(auction);
     }
 
     @Override
     public List<LongAuction> getAuctions() {
-        return auctionRepository.getAllAuctions().stream()
-                .peek(this::updateAuctionState)
-                .toList();
+        List<LongAuction> longAuctionList =  auctionRepository.getAllAuctions();
+        InMemoryAuctionStateUpdaterImpl.getInstance().addLongAuctionListToCheck(longAuctionList);
+        return longAuctionList;
     }
 }

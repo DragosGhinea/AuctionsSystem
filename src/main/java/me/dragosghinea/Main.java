@@ -19,6 +19,7 @@ import me.dragosghinea.services.impl.BlitzAuctionServiceImpl;
 import me.dragosghinea.services.impl.LongAuctionServiceImpl;
 import me.dragosghinea.services.impl.RewardServiceImpl;
 import me.dragosghinea.services.impl.UserServiceImpl;
+import me.dragosghinea.services.updater.InMemoryAuctionStateUpdaterImpl;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -26,6 +27,8 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
+        InMemoryAuctionStateUpdaterImpl.getInstance(); //making sure the instance is loaded right away
+
         try {
             DatabaseConnection.resetAllData(); //just for testing purposes
             DatabaseConnection.generateTables();

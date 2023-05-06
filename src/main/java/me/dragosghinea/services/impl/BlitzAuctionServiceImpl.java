@@ -7,6 +7,8 @@ import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.enums.AuctionState;
 import me.dragosghinea.repository.AuctionRepository;
 import me.dragosghinea.services.BlitzAuctionService;
+import me.dragosghinea.services.updater.InMemoryAuctionStateUpdaterImpl;
+import me.dragosghinea.services.updater.StateChangeEventData;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,6 +37,8 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
         if (auction.getAuctionState().equals(AuctionState.CANCELLED))
             return false;
 
+        StateChangeEventData stateChangeEventData = new StateChangeEventData(auction.getAuctionId(), auction.getAuctionState(), AuctionState.CANCELLED, "Blitz", auction);
+        InMemoryAuctionStateUpdaterImpl.getInstance().notifyObservers(stateChangeEventData);
         auction.setAuctionState(AuctionState.CANCELLED);
         auctionRepository.setState(auction.getAuctionId(), AuctionState.CANCELLED);
         return true;
@@ -43,6 +47,7 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
     @Override
     public boolean addAuction(Auction auction) throws IncompatibleAuction {
         if(auction instanceof BlitzAuction blitzAuction) {
+            InMemoryAuctionStateUpdaterImpl.getInstance().addAuctionToCheck(blitzAuction);
             return auctionRepository.addAuction(blitzAuction);
         }
         throw new IncompatibleAuction(auction.getClass(), BlitzAuction.class);
@@ -51,6 +56,7 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
     @Override
     public boolean removeAuction(Auction auction) throws IncompatibleAuction{
         if(auction instanceof BlitzAuction blitzAuction) {
+            InMemoryAuctionStateUpdaterImpl.getInstance().removeAuctionToCheck(blitzAuction);
             return auctionRepository.removeAuctionById(blitzAuction.getAuctionId());
         }
 
@@ -59,10 +65,12 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
 
     @Override
     public boolean removeAuction(UUID auctionId) {
+        InMemoryAuctionStateUpdaterImpl.getInstance().removeAuctionToCheck(auctionId);
         return auctionRepository.removeAuctionById(auctionId);
     }
 
     @Override
+    @Deprecated // the update should be done automatically by the AuctionStateUpdater
     public AuctionState updateAuctionState(Auction auction) {
         AuctionState old = auction.getAuctionState();
         AuctionState newState = getActualState(auction);
@@ -101,7 +109,7 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
         if(blitzAuction.getActualStartDate().isAfter(now))
             return AuctionState.PREPARING;
 
-        if(!blitzAuction.getEndDate().isBefore(now))
+        if(blitzAuction.getEndDate().isBefore(now))
             return AuctionState.ENDED;
 
         return AuctionState.ONGOING;
@@ -113,14 +121,14 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
         if(auction == null)
             return Optional.empty();
 
-        auction.setAuctionState(getActualState(auction));
+        InMemoryAuctionStateUpdaterImpl.getInstance().addAuctionToCheck(auction);
         return Optional.of(auction);
     }
 
     @Override
     public List<BlitzAuction> getAuctions() {
-        return auctionRepository.getAllAuctions().stream()
-                .peek(auction -> auction.setAuctionState(getActualState(auction)))
-                .toList();
+        List<BlitzAuction> blitzAuctions = auctionRepository.getAllAuctions();
+        InMemoryAuctionStateUpdaterImpl.getInstance().addBlitzAuctionListToCheck(blitzAuctions);
+        return  blitzAuctions;
     }
 }
