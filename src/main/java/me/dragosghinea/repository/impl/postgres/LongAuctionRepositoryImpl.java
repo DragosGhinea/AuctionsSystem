@@ -10,7 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,7 +18,7 @@ public class LongAuctionRepositoryImpl implements AuctionRepository<LongAuction>
     private static final AuctionMapper auctionMapper = AuctionMapper.getInstance();
 
     @Override
-    public boolean addAuction(LongAuction auction) {
+    public boolean addAuction(LongAuction auction) throws SQLException {
         String auctionInsertSql = "INSERT INTO Auction (auction_id, start_date, end_date, auction_state, starting_bid_amount, minimum_bid_gap, reward_id, auction_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         String longAuctionInsertSql = "INSERT INTO LongAuction (auction_id, extend_time, overtime) VALUES (?, ?, ?)";
 
@@ -51,13 +50,12 @@ public class LongAuctionRepositoryImpl implements AuctionRepository<LongAuction>
             return true; //conn will be closed by try with resources, changes will commit
             //if it fails, changes should rollback
         } catch (SQLException e) {
-            e.printStackTrace();
+           throw e;
         }
-        return false;
     }
 
     @Override
-    public boolean removeAuctionById(UUID auctionId) {
+    public boolean removeAuctionById(UUID auctionId) throws SQLException {
         String sql = "DELETE FROM Auction WHERE auction_id = ? AND auction_type = 'Long'";
 
         try(
@@ -68,13 +66,12 @@ public class LongAuctionRepositoryImpl implements AuctionRepository<LongAuction>
 
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public boolean updateAuction(LongAuction auction) {
+    public boolean updateAuction(LongAuction auction) throws SQLException {
         String auctionUpdateSql = "UPDATE Auction SET start_date = ?, end_date = ?, auction_state = ?, starting_bid_amount = ?, minimum_bid_gap = ?, reward_id = ? WHERE auction_id = ?";
         String longAuctionUpdateSql = "UPDATE LongAuction SET extend_time = ?, overtime = ? WHERE auction_id = ?";
 
@@ -104,13 +101,12 @@ public class LongAuctionRepositoryImpl implements AuctionRepository<LongAuction>
             return true; //conn will be closed by try with resources, changes will commit
             //if it fails, changes should rollback
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public Optional<LongAuction> getAuctionById(UUID auctionId) {
+    public Optional<LongAuction> getAuctionById(UUID auctionId) throws SQLException {
         String sql = "SELECT * FROM Auction a LEFT JOIN LongAuction b ON a.auction_id = b.auction_id WHERE a.auction_id = ?";
 
         try(
@@ -121,14 +117,12 @@ public class LongAuctionRepositoryImpl implements AuctionRepository<LongAuction>
 
             return Optional.ofNullable(auctionMapper.mapToLongAuction(stmt.executeQuery()));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-
-        return Optional.empty();
     }
 
     @Override
-    public List<LongAuction> getAllAuctions() {
+    public List<LongAuction> getAllAuctions() throws SQLException {
         String sql = "SELECT * FROM Auction a LEFT JOIN LongAuction b ON a.auction_id = b.auction_id WHERE a.auction_type = ?";
 
         try(
@@ -139,14 +133,12 @@ public class LongAuctionRepositoryImpl implements AuctionRepository<LongAuction>
 
             return auctionMapper.mapToLongAuctionList(stmt.executeQuery());
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-
-        return new ArrayList<>();
     }
 
     @Override
-    public boolean setReward(UUID auctionId, UUID rewardId) {
+    public boolean setReward(UUID auctionId, UUID rewardId) throws SQLException {
         String sql = "UPDATE Auction SET reward_id = ? WHERE auction_id = ? AND auction_type = 'Long'";
 
         try(
@@ -156,16 +148,14 @@ public class LongAuctionRepositoryImpl implements AuctionRepository<LongAuction>
             stmt.setObject(1, rewardId);
             stmt.setObject(2, auctionId);
 
-            stmt.executeUpdate();
+            return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-
-        return false;
     }
 
     @Override
-    public boolean setState(UUID auctionId, AuctionState state) {
+    public boolean setState(UUID auctionId, AuctionState state) throws SQLException {
         String sql = "UPDATE Auction SET auction_state = ? WHERE auction_id = ? AND auction_type = 'Long'";
 
         try(
@@ -175,16 +165,14 @@ public class LongAuctionRepositoryImpl implements AuctionRepository<LongAuction>
             stmt.setObject(1, state.toString());
             stmt.setObject(2, auctionId);
 
-            stmt.executeUpdate();
+            return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-
-        return false;
     }
 
     @Override
-    public List<LongAuction> getAuctionsByIds(List<UUID> auctionIds) {
+    public List<LongAuction> getAuctionsByIds(List<UUID> auctionIds) throws SQLException {
         String sql = "SELECT * FROM Auction a LEFT JOIN LongAuction b ON a.auction_id = b.auction_id WHERE a.auction_id IN (?) AND a.auction_type = ?";
 
         try(
@@ -196,9 +184,7 @@ public class LongAuctionRepositoryImpl implements AuctionRepository<LongAuction>
 
             return auctionMapper.mapToLongAuctionList(stmt.executeQuery());
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-
-        return new ArrayList<>();
     }
 }

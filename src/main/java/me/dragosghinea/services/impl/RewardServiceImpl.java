@@ -5,6 +5,7 @@ import me.dragosghinea.model.abstracts.Reward;
 import me.dragosghinea.repository.RewardRepository;
 import me.dragosghinea.services.RewardService;
 
+import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,16 +15,31 @@ public class RewardServiceImpl implements RewardService {
 
     @Override
     public boolean addReward(Reward reward) {
-        return rewardRepository.addReward(reward);
+        try {
+            return rewardRepository.addReward(reward);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
     public boolean removeReward(UUID rewardId) {
-        return rewardRepository.removeReward(rewardId);
+        try {
+            return rewardRepository.removeReward(rewardId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
     public Optional<Reward> getReward(UUID rewardId) {
-        return rewardRepository.getReward(rewardId);
+        try {
+            return rewardRepository.getReward(rewardId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
     }
 }

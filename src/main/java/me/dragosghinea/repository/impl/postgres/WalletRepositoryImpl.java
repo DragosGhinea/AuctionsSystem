@@ -17,7 +17,7 @@ public class WalletRepositoryImpl implements WalletRepository {
     private static final WalletMapper walletMapper = WalletMapper.getInstance();
 
     @Override
-    public Optional<Wallet> getWallet(UUID userId) {
+    public Optional<Wallet> getWallet(UUID userId) throws SQLException {
         String sql = "SELECT * FROM Wallet WHERE user_id = ?";
 
         try(
@@ -28,13 +28,12 @@ public class WalletRepositoryImpl implements WalletRepository {
 
             return Optional.ofNullable(walletMapper.mapToWallet(stmt.executeQuery()));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return Optional.empty();
     }
 
     @Override
-    public boolean updatePreferredCurrency(UUID userId, Currency currency) {
+    public boolean updatePreferredCurrency(UUID userId, Currency currency) throws SQLException {
         String sql = "UPDATE Wallet SET preferred_currency = ? WHERE user_id = ?";
 
         try(
@@ -46,13 +45,12 @@ public class WalletRepositoryImpl implements WalletRepository {
 
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public boolean setWalletPointsBalance(UUID userId, BigDecimal points) {
+    public boolean setWalletPointsBalance(UUID userId, BigDecimal points) throws SQLException {
         String sql = "UPDATE Wallet SET points = ? WHERE user_id = ?";
 
         try(
@@ -64,8 +62,7 @@ public class WalletRepositoryImpl implements WalletRepository {
 
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 }

@@ -16,6 +16,7 @@ import me.dragosghinea.services.UserService;
 import me.dragosghinea.services.WalletService;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -99,9 +100,13 @@ public class BidHistoryServiceImpl implements BidHistoryService {
             throw new UserNotFound(userId);
 
         Bid newBid = new BidRecord(userId, getAuction().getAuctionId(), needsToPay, points, LocalDateTime.now());
-        highestBids.put(userId, newBid);
-        bidHistory.getBids().add(newBid);
-        bidHistoryRepository.addBid(newBid);
+        try {
+            bidHistoryRepository.addBid(newBid);
+            highestBids.put(userId, newBid);
+            bidHistory.getBids().add(newBid);
+        }catch(SQLException x){
+            return false;
+        }
         return true;
     }
 
@@ -139,7 +144,12 @@ public class BidHistoryServiceImpl implements BidHistoryService {
                    return value;
             });
 
-            bidHistoryRepository.removeBid(bid);
+            try {
+                bidHistoryRepository.removeBid(bid);
+            }catch (SQLException x){
+                return false;
+            }
+
             return true;
         }
 
@@ -165,8 +175,13 @@ public class BidHistoryServiceImpl implements BidHistoryService {
             if(!givenPoints)
                 return false;
         }
-        bidHistory.getBids().removeIf(bid -> bid.getUserId().equals(userId));
-        bidHistoryRepository.removeAllBidsForUser(getAuction().getAuctionId(), userId);
+
+        try {
+            bidHistoryRepository.removeAllBidsForUser(getAuction().getAuctionId(), userId);
+            bidHistory.getBids().removeIf(bid -> bid.getUserId().equals(userId));
+        }catch(SQLException x){
+            return false;
+        }
         return true;
     }
 

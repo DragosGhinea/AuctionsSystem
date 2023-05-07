@@ -15,7 +15,7 @@ public class BundleRewardRepositoryImpl implements RewardRepository<BundleReward
     private static final RewardMapper rewardMapper = RewardMapper.getInstance();
 
     @Override
-    public boolean addReward(BundleReward reward) {
+    public boolean addReward(BundleReward reward) throws SQLException {
         String rewardInsertSql = "INSERT INTO Reward (reward_id, reward_name, reward_description, reward_type) VALUES (?, ?, ?, ?)";
         String multiRewardInsertSql = "INSERT INTO BundleReward (reward_id, included_reward_id) VALUES (?, ?)";
 
@@ -45,13 +45,12 @@ public class BundleRewardRepositoryImpl implements RewardRepository<BundleReward
             conn.commit();
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public boolean removeReward(UUID rewardId) {
+    public boolean removeReward(UUID rewardId) throws SQLException {
         String sql = "DELETE FROM Reward WHERE reward_id = ?";
 
         try(
@@ -62,13 +61,12 @@ public class BundleRewardRepositoryImpl implements RewardRepository<BundleReward
 
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public Optional<BundleReward> getReward(UUID rewardId) {
+    public Optional<BundleReward> getReward(UUID rewardId) throws SQLException {
         String sql = "SELECT * FROM Reward r LEFT JOIN BundleReward sr ON r.reward_id = sr.reward_id WHERE r.reward_id = ?";
 
         try(
@@ -88,14 +86,12 @@ public class BundleRewardRepositoryImpl implements RewardRepository<BundleReward
                             (ResultSet) callableStatement.getObject(1)
                     ));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-
-        return Optional.empty();
     }
 
     @Override
-    public boolean addIncludedReward(UUID rewardId, Reward reward) {
+    public boolean addIncludedReward(UUID rewardId, Reward reward) throws SQLException {
         if(reward instanceof BundleReward)
             return false;
 
@@ -110,13 +106,12 @@ public class BundleRewardRepositoryImpl implements RewardRepository<BundleReward
 
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public boolean removeIncludedReward(UUID rewardId, Reward reward) {
+    public boolean removeIncludedReward(UUID rewardId, Reward reward) throws SQLException {
         if(reward instanceof BundleReward)
             return false;
 
@@ -131,9 +126,8 @@ public class BundleRewardRepositoryImpl implements RewardRepository<BundleReward
 
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override

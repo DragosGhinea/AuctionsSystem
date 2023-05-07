@@ -20,7 +20,7 @@ public class RewardRepositoryImpl implements RewardRepository<Reward> {
     private final RewardRepository<BundleReward> bundleRewardRewardRepository = new BundleRewardRepositoryImpl();
 
     @Override
-    public boolean addReward(Reward reward) {
+    public boolean addReward(Reward reward) throws SQLException {
         if(reward instanceof SingleReward)
             return singleRewardRepository.addReward((SingleReward) reward);
         else if(reward instanceof MultiReward)
@@ -31,7 +31,7 @@ public class RewardRepositoryImpl implements RewardRepository<Reward> {
     }
 
     @Override
-    public boolean removeReward(UUID rewardId) {
+    public boolean removeReward(UUID rewardId) throws SQLException {
         if(!singleRewardRepository.removeReward(rewardId))
             if(!multiRewardRewardRepository.removeReward(rewardId))
                 return bundleRewardRewardRepository.removeReward(rewardId);
@@ -39,7 +39,7 @@ public class RewardRepositoryImpl implements RewardRepository<Reward> {
     }
 
     @Override
-    public Optional<Reward> getReward(UUID rewardId) {
+    public Optional<Reward> getReward(UUID rewardId) throws SQLException {
         Optional<? extends Reward> reward = singleRewardRepository.getReward(rewardId);
         if(reward.isPresent())
             return reward.map(r -> (Reward) r);
@@ -50,7 +50,7 @@ public class RewardRepositoryImpl implements RewardRepository<Reward> {
     }
 
     @Override
-    public boolean addIncludedReward(UUID rewardId, Reward reward) {
+    public boolean addIncludedReward(UUID rewardId, Reward reward) throws SQLException {
         if(reward instanceof SingleReward)
             return singleRewardRepository.addIncludedReward(rewardId, reward);
         else if(reward instanceof MultiReward)
@@ -61,7 +61,7 @@ public class RewardRepositoryImpl implements RewardRepository<Reward> {
     }
 
     @Override
-    public boolean addIncludedReward(UUID rewardId, String rewardInfo) {
+    public boolean addIncludedReward(UUID rewardId, String rewardInfo) throws SQLException {
         String sql = "SELECT reward_type FROM Reward WHERE reward_id = ?";
 
         String rewardType;
@@ -89,7 +89,7 @@ public class RewardRepositoryImpl implements RewardRepository<Reward> {
     }
 
     @Override
-    public boolean removeIncludedReward(UUID rewardId, Reward reward) {
+    public boolean removeIncludedReward(UUID rewardId, Reward reward) throws SQLException {
         if(reward instanceof SingleReward)
             return singleRewardRepository.removeIncludedReward(rewardId, reward);
         else if(reward instanceof MultiReward)
@@ -100,7 +100,7 @@ public class RewardRepositoryImpl implements RewardRepository<Reward> {
     }
 
     @Override
-    public boolean removeIncludedReward(UUID rewardId, String rewardInfo) {
+    public boolean removeIncludedReward(UUID rewardId, String rewardInfo) throws SQLException {
         String sql = "SELECT reward_type FROM Reward WHERE reward_id = ?";
 
         String rewardType;

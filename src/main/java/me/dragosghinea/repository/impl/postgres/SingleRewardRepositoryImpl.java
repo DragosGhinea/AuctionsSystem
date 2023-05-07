@@ -16,7 +16,7 @@ public class SingleRewardRepositoryImpl implements RewardRepository<SingleReward
     private static final RewardMapper rewardMapper = RewardMapper.getInstance();
 
     @Override
-    public boolean addReward(SingleReward reward) {
+    public boolean addReward(SingleReward reward) throws SQLException {
         String rewardInsertSql = "INSERT INTO Reward (reward_id, reward_name, reward_description, reward_type) VALUES (?, ?, ?, ?)";
         String singleRewardInsertSql = "INSERT INTO SingleReward (reward_id, reward_info) VALUES (?, ?)";
 
@@ -41,13 +41,12 @@ public class SingleRewardRepositoryImpl implements RewardRepository<SingleReward
             conn.commit();
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public boolean removeReward(UUID rewardId) {
+    public boolean removeReward(UUID rewardId) throws SQLException {
         String sql = "DELETE FROM Reward WHERE reward_id = ?";
 
         try(
@@ -58,13 +57,12 @@ public class SingleRewardRepositoryImpl implements RewardRepository<SingleReward
 
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public Optional<SingleReward> getReward(UUID rewardId) {
+    public Optional<SingleReward> getReward(UUID rewardId) throws SQLException {
         String sql = "SELECT * FROM Reward r LEFT JOIN SingleReward sr ON r.reward_id = sr.reward_id WHERE r.reward_id = ?";
 
         try(
@@ -75,10 +73,8 @@ public class SingleRewardRepositoryImpl implements RewardRepository<SingleReward
 
             return Optional.ofNullable(rewardMapper.mapToSingleReward(stmt.executeQuery()));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-
-        return Optional.empty();
     }
 
     @Override

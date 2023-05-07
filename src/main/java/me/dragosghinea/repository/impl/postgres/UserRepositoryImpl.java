@@ -21,7 +21,7 @@ public class UserRepositoryImpl implements UserRepository {
     private final WalletRepository walletRepository = new WalletRepositoryImpl();
 
     @Override
-    public Optional<User> getUserByEmail(String email){
+    public Optional<User> getUserByEmail(String email) throws SQLException {
         String sql = "SELECT * FROM UserDetails WHERE email ILIKE ?";
 
         try(
@@ -38,13 +38,12 @@ public class UserRepositoryImpl implements UserRepository {
             user.setWallet(walletRepository.getWallet(user.getUserId()).orElse(null));
             return Optional.of(user);
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return Optional.empty();
     }
 
     @Override
-    public Optional<User> getUserByUsername(String username){
+    public Optional<User> getUserByUsername(String username) throws SQLException {
         String sql = "SELECT * FROM UserDetails WHERE username ILIKE ?";
 
         try(
@@ -61,13 +60,12 @@ public class UserRepositoryImpl implements UserRepository {
             user.setWallet(walletRepository.getWallet(user.getUserId()).orElse(null));
             return Optional.of(user);
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return Optional.empty();
     }
 
     @Override
-    public boolean addUser(User user) {
+    public boolean addUser(User user) throws SQLException {
         String sql = "INSERT INTO UserDetails (user_id, email, username, birth_date, first_name, last_name, password_hash) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
@@ -100,13 +98,12 @@ public class UserRepositoryImpl implements UserRepository {
             conn.commit();
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw e;
         }
     }
 
     @Override
-    public boolean removeUserById(UUID id) {
+    public boolean removeUserById(UUID id) throws SQLException {
         String sql = "DELETE FROM UserDetails WHERE user_id = ?";
 
         try(
@@ -116,13 +113,12 @@ public class UserRepositoryImpl implements UserRepository {
             stmt.setObject(1, id);
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public Optional<User> getUserById(UUID id) {
+    public Optional<User> getUserById(UUID id) throws SQLException {
         String sql = "SELECT * FROM UserDetails WHERE user_id = ?";
 
         try(
@@ -139,13 +135,12 @@ public class UserRepositoryImpl implements UserRepository {
             user.setWallet(walletRepository.getWallet(user.getUserId()).orElse(null));
             return Optional.of(user);
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return Optional.empty();
     }
 
     @Override
-    public List<Auction> getUserAuctions(UUID userId) {
+    public List<Auction> getUserAuctions(UUID userId) throws SQLException {
         List<Auction> toReturn = new ArrayList<>();
 
         String sql = "SELECT * FROM Auction a LEFT JOIN BlitzAuction b ON a.auction_id = b.auction_id " +
@@ -159,14 +154,14 @@ public class UserRepositoryImpl implements UserRepository {
             stmt.setObject(1, userId);
             toReturn.addAll(auctionMapper.mapToAuctionList(stmt.executeQuery()));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
 
         return toReturn;
     }
 
     @Override
-    public Set<UUID> getUserAuctionIds(UUID userId) {
+    public Set<UUID> getUserAuctionIds(UUID userId) throws SQLException {
         Set<UUID> toReturn = new HashSet<>();
 
         String sql = "SELECT auction_id FROM UserAuctions WHERE user_id = ?";
@@ -181,14 +176,14 @@ public class UserRepositoryImpl implements UserRepository {
                 toReturn.add(set.getObject("auction_id", UUID.class));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
 
         return toReturn;
     }
 
     @Override
-    public boolean addAuctionToUser(UUID userId, UUID auctionId) {
+    public boolean addAuctionToUser(UUID userId, UUID auctionId) throws SQLException {
         String sql = "INSERT INTO UserAuctions (user_id, auction_id) VALUES (?, ?)";
 
         try(
@@ -204,13 +199,12 @@ public class UserRepositoryImpl implements UserRepository {
             if (e.getErrorCode() == 23503 && e.getMessage().contains("auction_id")){
                 throw new AuctionNotFound(auctionId);
             }
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public boolean removeAuctionFromUser(UUID userId, UUID auctionId) {
+    public boolean removeAuctionFromUser(UUID userId, UUID auctionId) throws SQLException {
         String sql = "DELETE FROM UserAuction WHERE user_id = ? AND auction_id = ?";
 
         try(
@@ -221,8 +215,7 @@ public class UserRepositoryImpl implements UserRepository {
             stmt.setObject(2, auctionId);
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 }

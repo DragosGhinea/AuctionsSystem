@@ -7,6 +7,7 @@ import me.dragosghinea.repository.WalletRepository;
 import me.dragosghinea.services.WalletService;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 
 @RequiredArgsConstructor
 public class WalletServiceImpl implements WalletService {
@@ -15,36 +16,51 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public boolean addPointsToWallet(BigDecimal points) {
-        if(walletRepository.setWalletPointsBalance(wallet.getOwnerId(), wallet.getPoints().add(points))){
-            wallet.addPoints(points);
-            return true;
-        }
+        try {
+            if(walletRepository.setWalletPointsBalance(wallet.getOwnerId(), wallet.getPoints().add(points))){
+                wallet.addPoints(points);
+                return true;
+            }
 
-        return false;
+            return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
     public boolean removePointsFromWallet(BigDecimal points) {
-        if(wallet.removePoints(points)){
-            if(!walletRepository.setWalletPointsBalance(wallet.getOwnerId(), wallet.getPoints())){
-                wallet.addPoints(points);
-                return false;
+        try {
+            if (wallet.removePoints(points)) {
+                if (!walletRepository.setWalletPointsBalance(wallet.getOwnerId(), wallet.getPoints())) {
+                    wallet.addPoints(points);
+                    return false;
+                }
+
+                return true;
             }
 
-            return true;
+            return false;
+        }catch(SQLException e){
+            e.printStackTrace();
+            return false;
         }
-
-        return false;
     }
 
     @Override
     public boolean setPointsBalance(BigDecimal points) {
-        if(walletRepository.setWalletPointsBalance(wallet.getOwnerId(), wallet.getPoints())){
-            wallet.setPoints(points);
-            return true;
-        }
+        try {
+            if (walletRepository.setWalletPointsBalance(wallet.getOwnerId(), wallet.getPoints())) {
+                wallet.setPoints(points);
+                return true;
+            }
 
-        return false;
+            return false;
+        }catch(SQLException e){
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
@@ -54,11 +70,16 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public boolean setPreferredCurrency(Currency currency) {
-        if(walletRepository.updatePreferredCurrency(wallet.getOwnerId(), currency)){
-            wallet.setPreferredCurrency(currency);
+        try {
+            if (walletRepository.updatePreferredCurrency(wallet.getOwnerId(), currency)) {
+                wallet.setPreferredCurrency(currency);
+                return false;
+            }
+
+            return true;
+        }catch(SQLException x){
+            x.printStackTrace();
             return false;
         }
-
-        return true;
     }
 }

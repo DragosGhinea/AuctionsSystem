@@ -12,6 +12,8 @@ import me.dragosghinea.repository.AuctionRepository;
 import me.dragosghinea.repository.RewardRepository;
 import me.dragosghinea.services.AuctionRewardsManagerService;
 
+import java.sql.SQLException;
+
 @RequiredArgsConstructor
 public class AuctionRewardsManagerServiceImpl implements AuctionRewardsManagerService {
     private final Auction auction;
@@ -20,10 +22,13 @@ public class AuctionRewardsManagerServiceImpl implements AuctionRewardsManagerSe
 
     @Override
     public boolean setReward(Reward reward) {
-        auctionRepository.setReward(auction.getAuctionId(), reward.getRewardId());
-        auction.setReward(reward);
-
-        return false;
+        try {
+            auctionRepository.setReward(auction.getAuctionId(), reward.getRewardId());
+            auction.setReward(reward);
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     /**
@@ -45,8 +50,12 @@ public class AuctionRewardsManagerServiceImpl implements AuctionRewardsManagerSe
                 bundleReward.getRewards().forEach(this::addReward);
             }
             else {
-                rewardRepository.addIncludedReward(auctionReward.getRewardId(), reward);
-                auctionReward.getRewards().add(reward);
+                try {
+                    rewardRepository.addIncludedReward(auctionReward.getRewardId(), reward);
+                    auctionReward.getRewards().add(reward);
+                }catch(SQLException x){
+                    return false;
+                }
             }
             return true;
         }
@@ -57,14 +66,22 @@ public class AuctionRewardsManagerServiceImpl implements AuctionRewardsManagerSe
                     .rewardDescription(reward.getRewardDescription())
                     .build();
 
-            rewardRepository.addReward(newReward);
-            auction.setReward(newReward);
+            try {
+                rewardRepository.addReward(newReward);
+                auction.setReward(newReward);
+            }catch(SQLException x){
+                return false;
+            }
         }
 
         if(!(auction.getReward() instanceof MultiReward auctionReward))
             return false;
 
-        rewardRepository.addIncludedReward(auction.getReward().getRewardId(), reward);
+        try {
+            rewardRepository.addIncludedReward(auction.getReward().getRewardId(), reward);
+        }catch(SQLException x){
+            return false;
+        }
 
         if(reward instanceof SingleReward singleReward){
             auctionReward.getRewardInfo().add(singleReward.getRewardInfo());
@@ -95,8 +112,12 @@ public class AuctionRewardsManagerServiceImpl implements AuctionRewardsManagerSe
     @Override
     public boolean removeReward(Reward reward) {
         if(reward instanceof BundleReward bundleReward) {
-            rewardRepository.removeIncludedReward(auction.getReward().getRewardId(), reward);
-            return bundleReward.getRewards().remove(reward);
+            try {
+                rewardRepository.removeIncludedReward(auction.getReward().getRewardId(), reward);
+                return bundleReward.getRewards().remove(reward);
+            }catch(SQLException x){
+                return false;
+            }
         }
 
         throw new IncompatibleReward(auction.getReward().getClass(), BundleReward.class);
@@ -125,8 +146,12 @@ public class AuctionRewardsManagerServiceImpl implements AuctionRewardsManagerSe
                 .rewardDescription(description)
                 .build();
         newReward.getRewards().add(auction.getReward());
-        rewardRepository.addReward(newReward);
-        auction.setReward(newReward);
+        try {
+            rewardRepository.addReward(newReward);
+            auction.setReward(newReward);
+        }catch(SQLException x){
+            return false;
+        }
         return true;
     }
 
@@ -146,10 +171,14 @@ public class AuctionRewardsManagerServiceImpl implements AuctionRewardsManagerSe
                     .rewardDescription(auction.getReward().getRewardDescription())
                     .build();
 
-            rewardRepository.addReward(newReward);
-            auction.setReward(newReward);
-            reward.getRewards().forEach(this::addReward);
-            return true;
+            try {
+                rewardRepository.addReward(newReward);
+                auction.setReward(newReward);
+                reward.getRewards().forEach(this::addReward);
+                return true;
+            }catch(SQLException x){
+                return false;
+            }
         }
 
         throw new IncompatibleReward(auction.getReward().getClass(), BundleReward.class);

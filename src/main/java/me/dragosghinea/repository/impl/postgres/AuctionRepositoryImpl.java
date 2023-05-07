@@ -21,7 +21,7 @@ public class AuctionRepositoryImpl implements AuctionRepository<Auction> {
     private final AuctionRepository<BlitzAuction> blitzAuctionAuctionRepository = new BlitzAuctionRepositoryImpl();
     private final AuctionRepository<LongAuction> longAuctionAuctionRepository = new LongAuctionRepositoryImpl();
     @Override
-    public boolean addAuction(Auction auction) {
+    public boolean addAuction(Auction auction) throws SQLException {
         if(auction instanceof BlitzAuction blitzAuction) {
             return blitzAuctionAuctionRepository.addAuction(blitzAuction);
         }
@@ -33,7 +33,7 @@ public class AuctionRepositoryImpl implements AuctionRepository<Auction> {
     }
 
     @Override
-    public boolean removeAuctionById(UUID auctionId) {
+    public boolean removeAuctionById(UUID auctionId) throws SQLException {
         String sql = "DELETE FROM Auction WHERE auction_id = ?";
 
         try(Connection connection = DatabaseConnection.getConnection();
@@ -43,14 +43,12 @@ public class AuctionRepositoryImpl implements AuctionRepository<Auction> {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-
-        return false;
     }
 
     @Override
-    public boolean updateAuction(Auction auction) {
+    public boolean updateAuction(Auction auction) throws SQLException {
         if(auction instanceof BlitzAuction blitzAuction) {
             return blitzAuctionAuctionRepository.updateAuction(blitzAuction);
         }
@@ -62,16 +60,23 @@ public class AuctionRepositoryImpl implements AuctionRepository<Auction> {
     }
 
     @Override
-    public Optional<Auction> getAuctionById(UUID auctionId) {
+    public Optional<Auction> getAuctionById(UUID auctionId) throws SQLException {
         return blitzAuctionAuctionRepository.getAuctionById(auctionId)
                 .map(a -> (Auction) a)
-                .or(() -> longAuctionAuctionRepository.getAuctionById(auctionId)
-                        .map(a -> (Auction) a)
+                .or(() -> {
+                            try {
+                                return longAuctionAuctionRepository.getAuctionById(auctionId)
+                                        .map(a -> (Auction) a);
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                                return Optional.empty();
+                            }
+                        }
                 );
     }
 
     @Override
-    public List<Auction> getAllAuctions() {
+    public List<Auction> getAllAuctions() throws SQLException {
         List<Auction> toReturn = new ArrayList<>();
         toReturn.addAll(blitzAuctionAuctionRepository.getAllAuctions());
         toReturn.addAll(longAuctionAuctionRepository.getAllAuctions());
@@ -79,7 +84,7 @@ public class AuctionRepositoryImpl implements AuctionRepository<Auction> {
     }
 
     @Override
-    public boolean setReward(UUID auctionId, UUID rewardId) {
+    public boolean setReward(UUID auctionId, UUID rewardId) throws SQLException {
         String sql = "UPDATE Auction SET reward_id = ? WHERE auction_id = ?";
 
         try(Connection connection = DatabaseConnection.getConnection();
@@ -90,14 +95,12 @@ public class AuctionRepositoryImpl implements AuctionRepository<Auction> {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-
-        return false;
     }
 
     @Override
-    public boolean setState(UUID auctionId, AuctionState state){
+    public boolean setState(UUID auctionId, AuctionState state) throws SQLException {
         String sql = "UPDATE Auction SET auction_state = ? WHERE auction_id = ?";
 
         try(Connection connection = DatabaseConnection.getConnection();
@@ -108,14 +111,12 @@ public class AuctionRepositoryImpl implements AuctionRepository<Auction> {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-
-        return false;
     }
 
     @Override
-    public List<Auction> getAuctionsByIds(List<UUID> auctionIds) {
+    public List<Auction> getAuctionsByIds(List<UUID> auctionIds) throws SQLException {
         List<Auction> toReturn = new ArrayList<>();
 
         String sql = "SELECT * FROM Auction a LEFT JOIN BlitzAuction b ON a.auction_id = b.auction_id " +
@@ -129,7 +130,7 @@ public class AuctionRepositoryImpl implements AuctionRepository<Auction> {
             stmt.setArray(1, conn.createArrayOf("UUID", auctionIds.toArray()));
             toReturn.addAll(auctionMapper.mapToAuctionList(stmt.executeQuery()));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
 
         return toReturn;

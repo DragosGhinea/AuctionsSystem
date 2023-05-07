@@ -15,7 +15,7 @@ public class BidHistoryRepositoryImpl implements BidHistoryRepository {
     private static final BidMapper bidMapper = BidMapper.getInstance();
 
     @Override
-    public boolean addBid(Bid bid) {
+    public boolean addBid(Bid bid) throws SQLException {
         String sql = "INSERT INTO Bid (user_id, auction_id, bid_date, points_bid, total_bid_value) VALUES (?, ?, ?, ?, ?)";
 
         try(
@@ -32,13 +32,12 @@ public class BidHistoryRepositoryImpl implements BidHistoryRepository {
             stmt.executeUpdate();
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public boolean removeBid(Bid bid) {
+    public boolean removeBid(Bid bid) throws SQLException {
         String sql = "DELETE FROM Bid WHERE user_id = ? AND auction_id = ? AND bid_date = ?";
 
         try(
@@ -51,13 +50,12 @@ public class BidHistoryRepositoryImpl implements BidHistoryRepository {
 
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public boolean removeBidList(Collection<Bid> bids) {
+    public boolean removeBidList(Collection<Bid> bids) throws SQLException {
         String sql = "DELETE FROM Bid WHERE (user_id, auction_id, bid_date) IN (" +
                     String.join(",", Collections.nCopies(bids.size(), "(?,?,?)"))+
                 ")";
@@ -75,13 +73,12 @@ public class BidHistoryRepositoryImpl implements BidHistoryRepository {
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public boolean removeAllBidsForUser(UUID auctionId, UUID userId) {
+    public boolean removeAllBidsForUser(UUID auctionId, UUID userId) throws SQLException {
         String sql = "DELETE FROM Bid WHERE user_id = ? AND auction_id = ?";
 
         try(
@@ -93,13 +90,12 @@ public class BidHistoryRepositoryImpl implements BidHistoryRepository {
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public List<Bid> getBids(UUID auctionId, UUID userId) {
+    public List<Bid> getBids(UUID auctionId, UUID userId) throws SQLException {
         String sql = "SELECT * FROM Bid WHERE user_id = ? AND auction_id = ?";
 
         try(
@@ -111,13 +107,12 @@ public class BidHistoryRepositoryImpl implements BidHistoryRepository {
 
             return bidMapper.mapToBids(stmt.executeQuery());
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return new ArrayList<>();
     }
 
     @Override
-    public List<Bid> getBids(UUID auctionId) {
+    public List<Bid> getBids(UUID auctionId) throws SQLException {
         String sql = "SELECT * FROM Bid WHERE auction_id = ?";
 
         try(
@@ -128,8 +123,7 @@ public class BidHistoryRepositoryImpl implements BidHistoryRepository {
 
             return bidMapper.mapToBids(stmt.executeQuery());
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return new ArrayList<>();
     }
 }

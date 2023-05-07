@@ -10,7 +10,9 @@ import me.dragosghinea.services.BlitzAuctionService;
 import me.dragosghinea.services.updater.InMemoryAuctionStateUpdaterImpl;
 import me.dragosghinea.services.updater.StateChangeEventData;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,8 +30,13 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
             return false;
 
         auction.setStartDate(LocalDateTime.now());
-        auctionRepository.updateAuction((BlitzAuction) auction);
-        return false;
+        try {
+            auctionRepository.updateAuction((BlitzAuction) auction);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -39,8 +46,13 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
 
         StateChangeEventData stateChangeEventData = new StateChangeEventData(auction.getAuctionId(), auction.getAuctionState(), AuctionState.CANCELLED, "Blitz", auction);
         InMemoryAuctionStateUpdaterImpl.getInstance().notifyObservers(stateChangeEventData);
-        auction.setAuctionState(AuctionState.CANCELLED);
-        auctionRepository.setState(auction.getAuctionId(), AuctionState.CANCELLED);
+
+        try {
+            auctionRepository.setState(auction.getAuctionId(), AuctionState.CANCELLED);
+            auction.setAuctionState(AuctionState.CANCELLED);
+        }catch(SQLException x){
+            return false;
+        }
         return true;
     }
 
@@ -48,7 +60,12 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
     public boolean addAuction(Auction auction) throws IncompatibleAuction {
         if(auction instanceof BlitzAuction blitzAuction) {
             InMemoryAuctionStateUpdaterImpl.getInstance().addAuctionToCheck(blitzAuction);
-            return auctionRepository.addAuction(blitzAuction);
+            try {
+                return auctionRepository.addAuction(blitzAuction);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
         }
         throw new IncompatibleAuction(auction.getClass(), BlitzAuction.class);
     }
@@ -57,7 +74,12 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
     public boolean removeAuction(Auction auction) throws IncompatibleAuction{
         if(auction instanceof BlitzAuction blitzAuction) {
             InMemoryAuctionStateUpdaterImpl.getInstance().removeAuctionToCheck(blitzAuction);
-            return auctionRepository.removeAuctionById(blitzAuction.getAuctionId());
+            try {
+                return auctionRepository.removeAuctionById(blitzAuction.getAuctionId());
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
         }
 
         throw new IncompatibleAuction(auction.getClass(), BlitzAuction.class);
@@ -66,7 +88,12 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
     @Override
     public boolean removeAuction(UUID auctionId) {
         InMemoryAuctionStateUpdaterImpl.getInstance().removeAuctionToCheck(auctionId);
-        return auctionRepository.removeAuctionById(auctionId);
+        try {
+            return auctionRepository.removeAuctionById(auctionId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
@@ -78,15 +105,26 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
         if(newState.equals(old))
             return old;
 
-        auctionRepository.setState(auction.getAuctionId(), newState);
-        auction.setAuctionState(newState);
-        return newState;
+        try {
+            auctionRepository.setState(auction.getAuctionId(), newState);
+            auction.setAuctionState(newState);
+            return newState;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return old;
+        }
     }
 
     @Override
     public boolean updateAuction(Auction auction) {
-        if(auction instanceof BlitzAuction blitzAuction)
-            return auctionRepository.updateAuction(blitzAuction);
+        if(auction instanceof BlitzAuction blitzAuction) {
+            try {
+                return auctionRepository.updateAuction(blitzAuction);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
 
         throw new IncompatibleAuction(auction.getClass(), BlitzAuction.class);
     }
@@ -117,18 +155,28 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
 
     @Override
     public Optional<BlitzAuction> getAuctionById(UUID auctionId) {
-        BlitzAuction auction = auctionRepository.getAuctionById(auctionId).orElse(null);
-        if(auction == null)
-            return Optional.empty();
+        try {
+            BlitzAuction auction = auctionRepository.getAuctionById(auctionId).orElse(null);
+            if (auction == null)
+                return Optional.empty();
 
-        InMemoryAuctionStateUpdaterImpl.getInstance().addAuctionToCheck(auction);
-        return Optional.of(auction);
+            InMemoryAuctionStateUpdaterImpl.getInstance().addAuctionToCheck(auction);
+            return Optional.of(auction);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
     }
 
     @Override
     public List<BlitzAuction> getAuctions() {
-        List<BlitzAuction> blitzAuctions = auctionRepository.getAllAuctions();
-        InMemoryAuctionStateUpdaterImpl.getInstance().addBlitzAuctionListToCheck(blitzAuctions);
-        return  blitzAuctions;
+        try {
+            List<BlitzAuction> blitzAuctions = auctionRepository.getAllAuctions();
+            InMemoryAuctionStateUpdaterImpl.getInstance().addBlitzAuctionListToCheck(blitzAuctions);
+            return blitzAuctions;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 }

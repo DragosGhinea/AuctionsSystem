@@ -10,7 +10,9 @@ import me.dragosghinea.services.LongAuctionService;
 import me.dragosghinea.services.updater.InMemoryAuctionStateUpdaterImpl;
 import me.dragosghinea.services.updater.StateChangeEventData;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,8 +30,13 @@ public class LongAuctionServiceImpl implements LongAuctionService {
             return false;
 
         auction.setStartDate(LocalDateTime.now());
-        auctionRepository.updateAuction((LongAuction) auction);
-        return false;
+        try {
+            auctionRepository.updateAuction((LongAuction) auction);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -39,8 +46,13 @@ public class LongAuctionServiceImpl implements LongAuctionService {
 
         StateChangeEventData stateChangeEventData = new StateChangeEventData(auction.getAuctionId(), auction.getAuctionState(), AuctionState.CANCELLED, "Long", auction);
         InMemoryAuctionStateUpdaterImpl.getInstance().notifyObservers(stateChangeEventData);
-        auction.setAuctionState(AuctionState.CANCELLED);
-        auctionRepository.setState(auction.getAuctionId(), AuctionState.CANCELLED);
+        try {
+            auctionRepository.setState(auction.getAuctionId(), AuctionState.CANCELLED);
+            auction.setAuctionState(AuctionState.CANCELLED);
+        }catch(SQLException x){
+            x.printStackTrace();
+            return false;
+        }
         return true;
     }
 
@@ -48,7 +60,12 @@ public class LongAuctionServiceImpl implements LongAuctionService {
     public boolean addAuction(Auction auction) throws IncompatibleAuction {
         if(auction instanceof LongAuction longAuction) {
             InMemoryAuctionStateUpdaterImpl.getInstance().addAuctionToCheck(longAuction);
-            return auctionRepository.addAuction(longAuction);
+            try {
+                return auctionRepository.addAuction(longAuction);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
         }
         throw new IncompatibleAuction(auction.getClass(), LongAuction.class);
     }
@@ -57,7 +74,12 @@ public class LongAuctionServiceImpl implements LongAuctionService {
     public boolean removeAuction(Auction auction) {
         if(auction instanceof LongAuction longAuction) {
             InMemoryAuctionStateUpdaterImpl.getInstance().removeAuctionToCheck(longAuction);
-            return auctionRepository.removeAuctionById(longAuction.getAuctionId());
+            try {
+                return auctionRepository.removeAuctionById(longAuction.getAuctionId());
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
         }
         throw new IncompatibleAuction(auction.getClass(), LongAuction.class);
     }
@@ -65,7 +87,12 @@ public class LongAuctionServiceImpl implements LongAuctionService {
     @Override
     public boolean removeAuction(UUID auctionId) {
         InMemoryAuctionStateUpdaterImpl.getInstance().removeAuctionToCheck(auctionId);
-        return auctionRepository.removeAuctionById(auctionId);
+        try {
+            return auctionRepository.removeAuctionById(auctionId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
@@ -77,15 +104,26 @@ public class LongAuctionServiceImpl implements LongAuctionService {
         if(newState.equals(old))
             return old;
 
-        auctionRepository.setState(auction.getAuctionId(), newState);
-        auction.setAuctionState(newState);
-        return newState;
+        try {
+            auctionRepository.setState(auction.getAuctionId(), newState);
+            auction.setAuctionState(newState);
+            return newState;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return old;
+        }
     }
 
     @Override
     public boolean updateAuction(Auction auction) {
-        if(auction instanceof LongAuction longAuction)
-            return auctionRepository.updateAuction(longAuction);
+        if(auction instanceof LongAuction longAuction) {
+            try {
+                return auctionRepository.updateAuction(longAuction);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
 
         throw new IncompatibleAuction(auction.getClass(), LongAuction.class);
     }
@@ -116,18 +154,28 @@ public class LongAuctionServiceImpl implements LongAuctionService {
 
     @Override
     public Optional<LongAuction> getAuctionById(UUID auctionId) {
-        LongAuction auction = auctionRepository.getAuctionById(auctionId).orElse(null);
-        if(auction == null)
-            return Optional.empty();
+        try {
+            LongAuction auction = auctionRepository.getAuctionById(auctionId).orElse(null);
+            if (auction == null)
+                return Optional.empty();
 
-        InMemoryAuctionStateUpdaterImpl.getInstance().addAuctionToCheck(auction);
-        return Optional.of(auction);
+            InMemoryAuctionStateUpdaterImpl.getInstance().addAuctionToCheck(auction);
+            return Optional.of(auction);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
     }
 
     @Override
     public List<LongAuction> getAuctions() {
-        List<LongAuction> longAuctionList =  auctionRepository.getAllAuctions();
-        InMemoryAuctionStateUpdaterImpl.getInstance().addLongAuctionListToCheck(longAuctionList);
-        return longAuctionList;
+        try {
+            List<LongAuction> longAuctionList = auctionRepository.getAllAuctions();
+            InMemoryAuctionStateUpdaterImpl.getInstance().addLongAuctionListToCheck(longAuctionList);
+            return longAuctionList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 }

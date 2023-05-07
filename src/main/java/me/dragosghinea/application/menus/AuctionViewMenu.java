@@ -82,7 +82,6 @@ public class AuctionViewMenu implements Menu{
                             break;
                         }
 
-                        auctionService.updateAuctionState(auction);
                         if(auction.getAuctionState().equals(AuctionState.ENDED) || auction.getAuctionState().equals(AuctionState.CANCELLED)){
                             getOutputSource().println("This auction can no longer receive bids!");
                             break;

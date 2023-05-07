@@ -17,7 +17,7 @@ public class MultiRewardRepositoryImpl implements RewardRepository<MultiReward> 
     private static final RewardMapper rewardMapper = RewardMapper.getInstance();
 
     @Override
-    public boolean addReward(MultiReward reward) {
+    public boolean addReward(MultiReward reward) throws SQLException {
         String rewardInsertSql = "INSERT INTO Reward (reward_id, reward_name, reward_description, reward_type) VALUES (?, ?, ?, ?)";
         String multiRewardInsertSql = "INSERT INTO MultiReward (reward_id, reward_info) VALUES (?, ?)";
 
@@ -45,13 +45,12 @@ public class MultiRewardRepositoryImpl implements RewardRepository<MultiReward> 
             conn.commit();
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public boolean removeReward(UUID rewardId) {
+    public boolean removeReward(UUID rewardId) throws SQLException {
         String sql = "DELETE FROM Reward WHERE reward_id = ?";
 
         try(
@@ -62,13 +61,12 @@ public class MultiRewardRepositoryImpl implements RewardRepository<MultiReward> 
 
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public Optional<MultiReward> getReward(UUID rewardId) {
+    public Optional<MultiReward> getReward(UUID rewardId) throws SQLException {
         String sql = "SELECT * FROM Reward r LEFT JOIN MultiReward sr ON r.reward_id = sr.reward_id WHERE r.reward_id = ?";
 
         try(
@@ -79,31 +77,43 @@ public class MultiRewardRepositoryImpl implements RewardRepository<MultiReward> 
 
             return Optional.ofNullable(rewardMapper.mapToMultiReward(stmt.executeQuery()));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-
-        return Optional.empty();
     }
 
     @Override
-    public boolean addIncludedReward(UUID rewardId, Reward reward) {
-        if(reward instanceof SingleReward singleReward){
-            return addIncludedReward(rewardId, singleReward.getRewardInfo());
-        }
-        else if(reward instanceof MultiReward multiReward){
-            for(String rewardInfo : multiReward.getRewardInfo()){
-                if(!addIncludedReward(rewardId, rewardInfo)){
-                    return false;
-                }
+    public boolean addIncludedReward(UUID rewardId, Reward reward) throws SQLException {
+        String sql = "INSERT INTO MultiReward (reward_id, reward_info) VALUES (?, ?)";
+
+        try(
+                Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)
+        ) {
+            if(reward instanceof SingleReward singleReward) {
+                stmt.setObject(1, rewardId);
+                stmt.setString(2, singleReward.getRewardInfo());
+
+                return stmt.executeUpdate() == 1;
             }
-            return true;
+            else if(reward instanceof MultiReward multiReward){
+                for(String rewardInfo : multiReward.getRewardInfo()){
+                    stmt.setObject(1, rewardId);
+                    stmt.setString(2, rewardInfo);
+
+                    stmt.addBatch();
+                }
+
+                return stmt.executeBatch().length == multiReward.getRewardInfo().size();
+            }
+        } catch (SQLException e) {
+            throw e;
         }
 
         return false;
     }
 
     @Override
-    public boolean addIncludedReward(UUID rewardId, String rewardInfo) {
+    public boolean addIncludedReward(UUID rewardId, String rewardInfo) throws SQLException {
         String sql = "INSERT INTO MultiReward (reward_id, reward_info) VALUES (?, ?)";
 
         try(
@@ -115,30 +125,43 @@ public class MultiRewardRepositoryImpl implements RewardRepository<MultiReward> 
 
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public boolean removeIncludedReward(UUID rewardId, Reward reward) {
-        if(reward instanceof SingleReward singleReward){
-            return removeIncludedReward(rewardId, singleReward.getRewardInfo());
-        }
-        else if(reward instanceof MultiReward multiReward){
-            for(String rewardInfo : multiReward.getRewardInfo()){
-                if(!removeIncludedReward(rewardId, rewardInfo)){
-                    return false;
-                }
+    public boolean removeIncludedReward(UUID rewardId, Reward reward) throws SQLException {
+        String sql = "DELETE FROM MultiReward WHERE reward_id = ? AND reward_info = ?";
+
+        try(
+                Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)
+        ) {
+            if(reward instanceof SingleReward singleReward) {
+                stmt.setObject(1, rewardId);
+                stmt.setString(2, singleReward.getRewardInfo());
+
+                return stmt.executeUpdate() == 1;
             }
-            return true;
+            else if(reward instanceof MultiReward multiReward){
+                for(String rewardInfo : multiReward.getRewardInfo()){
+                    stmt.setObject(1, rewardId);
+                    stmt.setString(2, rewardInfo);
+
+                    stmt.addBatch();
+                }
+
+                return stmt.executeBatch().length == multiReward.getRewardInfo().size();
+            }
+        } catch (SQLException e) {
+            throw e;
         }
 
         return false;
     }
 
     @Override
-    public boolean removeIncludedReward(UUID rewardId, String rewardInfo) {
+    public boolean removeIncludedReward(UUID rewardId, String rewardInfo) throws SQLException {
         String sql = "DELETE FROM MultiReward WHERE reward_id = ? AND reward_info = ?";
 
         try(
@@ -150,8 +173,7 @@ public class MultiRewardRepositoryImpl implements RewardRepository<MultiReward> 
 
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 }

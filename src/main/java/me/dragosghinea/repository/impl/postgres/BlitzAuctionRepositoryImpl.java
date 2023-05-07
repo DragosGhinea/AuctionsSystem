@@ -6,8 +6,10 @@ import me.dragosghinea.model.BlitzAuction;
 import me.dragosghinea.model.enums.AuctionState;
 import me.dragosghinea.repository.AuctionRepository;
 
-import java.sql.*;
-import java.util.ArrayList;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -16,7 +18,7 @@ public class BlitzAuctionRepositoryImpl implements AuctionRepository<BlitzAuctio
     private static final AuctionMapper auctionMapper = AuctionMapper.getInstance();
 
     @Override
-    public boolean addAuction(BlitzAuction auction) {
+    public boolean addAuction(BlitzAuction auction) throws SQLException {
         String auctionInsertSql = "INSERT INTO Auction (auction_id, start_date, end_date, auction_state, starting_bid_amount, minimum_bid_gap, reward_id, auction_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         String blitzAuctionInsertSql = "INSERT INTO BlitzAuction (auction_id, bid_duration, preparing_duration) VALUES (?, ?, ?)";
 
@@ -48,13 +50,12 @@ public class BlitzAuctionRepositoryImpl implements AuctionRepository<BlitzAuctio
             return true; //conn will be closed by try with resources, changes will commit
                          //if it fails, changes should rollback
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public boolean removeAuctionById(UUID auctionId) {
+    public boolean removeAuctionById(UUID auctionId) throws SQLException {
         String sql = "DELETE FROM Auction WHERE auction_id = ? AND auction_type = 'Blitz'";
 
         try(
@@ -65,13 +66,12 @@ public class BlitzAuctionRepositoryImpl implements AuctionRepository<BlitzAuctio
 
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public boolean updateAuction(BlitzAuction auction) {
+    public boolean updateAuction(BlitzAuction auction) throws SQLException {
         String auctionUpdateSql = "UPDATE Auction SET start_date = ?, end_date = ?, auction_state = ?, starting_bid_amount = ?, minimum_bid_gap = ?, reward_id = ? WHERE auction_id = ?";
         String blitzAuctionUpdateSql = "UPDATE BlitzAuction SET bid_duration = ?, preparing_duration = ? WHERE auction_id = ?";
 
@@ -102,13 +102,12 @@ public class BlitzAuctionRepositoryImpl implements AuctionRepository<BlitzAuctio
             return true; //conn will be closed by try with resources, changes will commit
             //if it fails, changes should rollback
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return false;
     }
 
     @Override
-    public Optional<BlitzAuction> getAuctionById(UUID auctionId) {
+    public Optional<BlitzAuction> getAuctionById(UUID auctionId) throws SQLException {
         String sql = "SELECT * FROM Auction a LEFT JOIN BlitzAuction b ON a.auction_id = b.auction_id WHERE a.auction_id = ?";
 
         try(
@@ -119,14 +118,13 @@ public class BlitzAuctionRepositoryImpl implements AuctionRepository<BlitzAuctio
 
             return Optional.ofNullable(auctionMapper.mapToBlitzAuction(stmt.executeQuery()));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
 
-        return Optional.empty();
     }
 
     @Override
-    public List<BlitzAuction> getAllAuctions() {
+    public List<BlitzAuction> getAllAuctions() throws SQLException {
         String sql = "SELECT * FROM Auction a LEFT JOIN BlitzAuction b ON a.auction_id = b.auction_id WHERE a.auction_type = ?";
 
         try(
@@ -137,14 +135,12 @@ public class BlitzAuctionRepositoryImpl implements AuctionRepository<BlitzAuctio
 
             return auctionMapper.mapToBlitzAuctionList(stmt.executeQuery());
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-
-        return new ArrayList<>();
     }
 
     @Override
-    public boolean setReward(UUID auctionId, UUID rewardId) {
+    public boolean setReward(UUID auctionId, UUID rewardId) throws SQLException {
         String sql = "UPDATE Auction SET reward_id = ? WHERE auction_id = ? AND auction_type = 'Blitz'";
 
         try(
@@ -154,16 +150,14 @@ public class BlitzAuctionRepositoryImpl implements AuctionRepository<BlitzAuctio
             stmt.setObject(1, rewardId);
             stmt.setObject(2, auctionId);
 
-            stmt.executeUpdate();
+            return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-
-        return false;
     }
 
     @Override
-    public boolean setState(UUID auctionId, AuctionState state) {
+    public boolean setState(UUID auctionId, AuctionState state) throws SQLException {
         String sql = "UPDATE Auction SET auction_state = ? WHERE auction_id = ? AND auction_type = 'Blitz'";
 
         try(
@@ -173,16 +167,14 @@ public class BlitzAuctionRepositoryImpl implements AuctionRepository<BlitzAuctio
             stmt.setObject(1, state.toString());
             stmt.setObject(2, auctionId);
 
-            stmt.executeUpdate();
+            return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-
-        return false;
     }
 
     @Override
-    public List<BlitzAuction> getAuctionsByIds(List<UUID> auctionIds) {
+    public List<BlitzAuction> getAuctionsByIds(List<UUID> auctionIds) throws SQLException {
         String sql = "SELECT * FROM Auction a LEFT JOIN BlitzAuction b ON a.auction_id = b.auction_id WHERE a.auction_id IN (?) AND a.auction_type = ?";
 
         try(
@@ -194,9 +186,7 @@ public class BlitzAuctionRepositoryImpl implements AuctionRepository<BlitzAuctio
 
             return auctionMapper.mapToBlitzAuctionList(stmt.executeQuery());
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
-
-        return new ArrayList<>();
     }
 }
