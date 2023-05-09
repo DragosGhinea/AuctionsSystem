@@ -73,10 +73,10 @@ public class WalletServiceImpl implements WalletService {
         try {
             if (walletRepository.updatePreferredCurrency(wallet.getOwnerId(), currency)) {
                 wallet.setPreferredCurrency(currency);
-                return false;
+                return true;
             }
 
-            return true;
+            return false;
         }catch(SQLException x){
             x.printStackTrace();
             return false;

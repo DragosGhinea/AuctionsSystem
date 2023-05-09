@@ -1,9 +1,6 @@
 package me.dragosghinea.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import me.dragosghinea.model.enums.Currency;
 
 import java.math.BigDecimal;
@@ -14,6 +11,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Wallet {
 
     private UUID ownerId;

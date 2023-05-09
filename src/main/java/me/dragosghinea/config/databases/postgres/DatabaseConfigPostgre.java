@@ -6,7 +6,6 @@ import me.dragosghinea.config.DatabaseConnection;
 import me.dragosghinea.config.databases.DatabaseConfig;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -132,7 +131,7 @@ public class DatabaseConfigPostgre implements DatabaseConfig {
                 "    auction_state VARCHAR(40) NOT NULL," +
                 "    starting_bid_amount NUMERIC(15, 3) NOT NULL," +
                 "    minimum_bid_gap NUMERIC(15, 3) NOT NULL," +
-                "    reward_id UUID REFERENCES Reward(reward_id) ON UPDATE CASCADE ON DELETE SET NULL," +
+                "    reward_id UUID REFERENCES Reward(reward_id) ON UPDATE CASCADE," +
                 "    auction_type VARCHAR(40) NOT NULL" +
                 ")";
 
