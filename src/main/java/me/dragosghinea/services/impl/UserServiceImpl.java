@@ -1,7 +1,7 @@
 package me.dragosghinea.services.impl;
 
 import lombok.RequiredArgsConstructor;
-import me.dragosghinea.exceptions.AuctionNotFound;
+import me.dragosghinea.exceptions.AuctionNotFoundException;
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.UserDetails;
 import me.dragosghinea.model.abstracts.Auction;
@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean addAuctionToUser(UUID userId, UUID auctionId) throws AuctionNotFound {
+    public boolean addAuctionToUser(UUID userId, UUID auctionId) throws AuctionNotFoundException {
         try {
             return userRepository.addAuctionToUser(userId, auctionId);
         } catch (SQLException e) {

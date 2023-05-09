@@ -1,7 +1,7 @@
 package me.dragosghinea.application.menus;
 
-import me.dragosghinea.exceptions.BidTooLow;
-import me.dragosghinea.exceptions.UserNotFound;
+import me.dragosghinea.exceptions.BidTooLowException;
+import me.dragosghinea.exceptions.UserNotFoundException;
 import me.dragosghinea.model.BlitzAuction;
 import me.dragosghinea.model.LongAuction;
 import me.dragosghinea.model.User;
@@ -124,12 +124,12 @@ public class AuctionViewMenu implements Menu{
                                 getOutputSource().println("The bid couldn't be placed! Are you sure you have the money?");
                             }
                         }
-                        catch(UserNotFound x){
+                        catch(UserNotFoundException x){
                             x.printStackTrace();
                             auditService.logFatalAction(AuditAction.USER_ERROR, "User "+user.getUserDetails().getUsername()+" was not found in the database, even though they are logged in.");
                             getOutputSource().println("For some reason, you were not found in the database.");
                         }
-                        catch(BidTooLow x){
+                        catch(BidTooLowException x){
                             auditService.logWarnAction(AuditAction.BID_PLACE, x.getMessage(), user.getUserDetails().getUsername());
                             getOutputSource().println(x.getMessage());
                         }

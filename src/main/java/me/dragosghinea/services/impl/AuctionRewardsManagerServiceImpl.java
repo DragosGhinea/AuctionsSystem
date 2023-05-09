@@ -1,7 +1,7 @@
 package me.dragosghinea.services.impl;
 
 import lombok.RequiredArgsConstructor;
-import me.dragosghinea.exceptions.IncompatibleReward;
+import me.dragosghinea.exceptions.IncompatibleRewardException;
 import me.dragosghinea.model.BundleReward;
 import me.dragosghinea.model.MultiReward;
 import me.dragosghinea.model.SingleReward;
@@ -107,7 +107,7 @@ public class AuctionRewardsManagerServiceImpl implements AuctionRewardsManagerSe
      * @return
      * true if the reward was in the list,
      * false if the reward was not found in the list
-     * @throws IncompatibleReward if reward is not a bundle
+     * @throws IncompatibleRewardException if reward is not a bundle
      */
     @Override
     public boolean removeReward(Reward reward) {
@@ -120,7 +120,7 @@ public class AuctionRewardsManagerServiceImpl implements AuctionRewardsManagerSe
             }
         }
 
-        throw new IncompatibleReward(auction.getReward().getClass(), BundleReward.class);
+        throw new IncompatibleRewardException(auction.getReward().getClass(), BundleReward.class);
     }
 
     /**
@@ -161,10 +161,10 @@ public class AuctionRewardsManagerServiceImpl implements AuctionRewardsManagerSe
      *
      * @return
      * true if unpacked
-     * @throws IncompatibleReward if stored reward is not a bundle
+     * @throws IncompatibleRewardException if stored reward is not a bundle
      */
     @Override
-    public boolean transformUnbundle() throws IncompatibleReward {
+    public boolean transformUnbundle() throws IncompatibleRewardException {
         if(auction.getReward() instanceof BundleReward reward){
             MultiReward newReward = MultiReward.builder()
                     .rewardName(auction.getReward().getRewardName())
@@ -181,6 +181,6 @@ public class AuctionRewardsManagerServiceImpl implements AuctionRewardsManagerSe
             }
         }
 
-        throw new IncompatibleReward(auction.getReward().getClass(), BundleReward.class);
+        throw new IncompatibleRewardException(auction.getReward().getClass(), BundleReward.class);
     }
 }

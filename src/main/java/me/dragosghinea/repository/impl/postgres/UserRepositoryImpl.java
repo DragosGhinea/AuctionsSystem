@@ -1,7 +1,7 @@
 package me.dragosghinea.repository.impl.postgres;
 
 import me.dragosghinea.config.DatabaseConnection;
-import me.dragosghinea.exceptions.AuctionNotFound;
+import me.dragosghinea.exceptions.AuctionNotFoundException;
 import me.dragosghinea.mapper.AuctionMapper;
 import me.dragosghinea.mapper.UserMapper;
 import me.dragosghinea.model.User;
@@ -197,7 +197,7 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (SQLException e) {
             //23503 is the error code for foreign key violation
             if (e.getErrorCode() == 23503 && e.getMessage().contains("auction_id")){
-                throw new AuctionNotFound(auctionId);
+                throw new AuctionNotFoundException(auctionId);
             }
             throw e;
         }

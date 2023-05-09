@@ -1,7 +1,7 @@
 package me.dragosghinea.services.impl;
 
-import me.dragosghinea.exceptions.BidTooLow;
-import me.dragosghinea.exceptions.UserNotFound;
+import me.dragosghinea.exceptions.BidTooLowException;
+import me.dragosghinea.exceptions.UserNotFoundException;
 import me.dragosghinea.model.BidHistory;
 import me.dragosghinea.model.BidRecord;
 import me.dragosghinea.model.User;
@@ -61,14 +61,14 @@ public class BidHistoryServiceImpl implements BidHistoryService {
     }
 
     @Override
-    public boolean addBid(UUID userId, BigDecimal points, boolean takePoints) throws BidTooLow, UserNotFound{
+    public boolean addBid(UUID userId, BigDecimal points, boolean takePoints) throws BidTooLowException, UserNotFoundException {
         if(points.compareTo(BigDecimal.ZERO)<0) {
             return false;
         }
 
         BigDecimal latest = getLatestBid().map(Bid::getTotalBidValue).orElse(BigDecimal.ZERO);
         if(latest.compareTo(points)>=0) {
-            throw new BidTooLow(latest, points, userId);
+            throw new BidTooLowException(latest, points, userId);
         }
 
 
@@ -82,7 +82,7 @@ public class BidHistoryServiceImpl implements BidHistoryService {
         if(takePoints){
             Optional<User> user = userService.getUserById(userId);
             if(user.isEmpty())
-                throw new UserNotFound(userId);
+                throw new UserNotFoundException(userId);
             final WalletRepository walletRepository = new WalletRepositoryImpl();
             Boolean tookPoints = user
                                     .map(User::getWallet)
@@ -97,7 +97,7 @@ public class BidHistoryServiceImpl implements BidHistoryService {
             }
         }
         else if(userService.getUserById(userId).isEmpty())
-            throw new UserNotFound(userId);
+            throw new UserNotFoundException(userId);
 
         Bid newBid = new BidRecord(userId, getAuction().getAuctionId(), needsToPay, points, LocalDateTime.now());
         try {
@@ -111,7 +111,7 @@ public class BidHistoryServiceImpl implements BidHistoryService {
     }
 
     @Override
-    public boolean addBid(UUID userId, BigDecimal amount, Currency currency, boolean takePoints) throws BidTooLow, UserNotFound{
+    public boolean addBid(UUID userId, BigDecimal amount, Currency currency, boolean takePoints) throws BidTooLowException, UserNotFoundException {
         return addBid(userId, currency.getPointsAmount(amount), takePoints);
     }
 

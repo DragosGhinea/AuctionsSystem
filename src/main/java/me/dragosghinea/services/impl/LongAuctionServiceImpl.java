@@ -1,7 +1,7 @@
 package me.dragosghinea.services.impl;
 
 import lombok.RequiredArgsConstructor;
-import me.dragosghinea.exceptions.IncompatibleAuction;
+import me.dragosghinea.exceptions.IncompatibleAuctionException;
 import me.dragosghinea.model.LongAuction;
 import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.enums.AuctionState;
@@ -24,7 +24,7 @@ public class LongAuctionServiceImpl implements LongAuctionService {
     @Override
     public boolean startAuction(Auction auction) {
         if(!(auction instanceof LongAuction))
-            throw new IncompatibleAuction(auction.getClass(), LongAuction.class);
+            throw new IncompatibleAuctionException(auction.getClass(), LongAuction.class);
 
         if (auction.getStartDate().isBefore(LocalDateTime.now()))
             return false;
@@ -57,7 +57,7 @@ public class LongAuctionServiceImpl implements LongAuctionService {
     }
 
     @Override
-    public boolean addAuction(Auction auction) throws IncompatibleAuction {
+    public boolean addAuction(Auction auction) throws IncompatibleAuctionException {
         if(auction instanceof LongAuction longAuction) {
             InMemoryAuctionStateUpdaterImpl.getInstance().addAuctionToCheck(longAuction);
             try {
@@ -67,7 +67,7 @@ public class LongAuctionServiceImpl implements LongAuctionService {
                 return false;
             }
         }
-        throw new IncompatibleAuction(auction.getClass(), LongAuction.class);
+        throw new IncompatibleAuctionException(auction.getClass(), LongAuction.class);
     }
 
     @Override
@@ -81,7 +81,7 @@ public class LongAuctionServiceImpl implements LongAuctionService {
                 return false;
             }
         }
-        throw new IncompatibleAuction(auction.getClass(), LongAuction.class);
+        throw new IncompatibleAuctionException(auction.getClass(), LongAuction.class);
     }
 
     @Override
@@ -125,7 +125,7 @@ public class LongAuctionServiceImpl implements LongAuctionService {
             }
         }
 
-        throw new IncompatibleAuction(auction.getClass(), LongAuction.class);
+        throw new IncompatibleAuctionException(auction.getClass(), LongAuction.class);
     }
 
     @Override

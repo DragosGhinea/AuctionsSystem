@@ -1,7 +1,7 @@
 package me.dragosghinea.services.impl;
 
 import lombok.RequiredArgsConstructor;
-import me.dragosghinea.exceptions.IncompatibleAuction;
+import me.dragosghinea.exceptions.IncompatibleAuctionException;
 import me.dragosghinea.model.BlitzAuction;
 import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.enums.AuctionState;
@@ -24,7 +24,7 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
     @Override
     public boolean startAuction(Auction auction) {
         if(!(auction instanceof BlitzAuction))
-            throw new IncompatibleAuction(auction.getClass(), BlitzAuction.class);
+            throw new IncompatibleAuctionException(auction.getClass(), BlitzAuction.class);
 
         if (auction.getStartDate().isBefore(LocalDateTime.now()))
             return false;
@@ -57,7 +57,7 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
     }
 
     @Override
-    public boolean addAuction(Auction auction) throws IncompatibleAuction {
+    public boolean addAuction(Auction auction) throws IncompatibleAuctionException {
         if(auction instanceof BlitzAuction blitzAuction) {
             InMemoryAuctionStateUpdaterImpl.getInstance().addAuctionToCheck(blitzAuction);
             try {
@@ -67,11 +67,11 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
                 return false;
             }
         }
-        throw new IncompatibleAuction(auction.getClass(), BlitzAuction.class);
+        throw new IncompatibleAuctionException(auction.getClass(), BlitzAuction.class);
     }
 
     @Override
-    public boolean removeAuction(Auction auction) throws IncompatibleAuction{
+    public boolean removeAuction(Auction auction) throws IncompatibleAuctionException {
         if(auction instanceof BlitzAuction blitzAuction) {
             InMemoryAuctionStateUpdaterImpl.getInstance().removeAuctionToCheck(blitzAuction);
             try {
@@ -82,7 +82,7 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
             }
         }
 
-        throw new IncompatibleAuction(auction.getClass(), BlitzAuction.class);
+        throw new IncompatibleAuctionException(auction.getClass(), BlitzAuction.class);
     }
 
     @Override
@@ -126,7 +126,7 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
             }
         }
 
-        throw new IncompatibleAuction(auction.getClass(), BlitzAuction.class);
+        throw new IncompatibleAuctionException(auction.getClass(), BlitzAuction.class);
     }
 
     @Override

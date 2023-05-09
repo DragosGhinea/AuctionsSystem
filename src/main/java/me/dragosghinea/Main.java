@@ -3,7 +3,7 @@ package me.dragosghinea;
 import me.dragosghinea.application.DefaultEntitiesGenerator;
 import me.dragosghinea.application.menus.MainMenu;
 import me.dragosghinea.config.DatabaseConnection;
-import me.dragosghinea.exceptions.IncompatibleAuction;
+import me.dragosghinea.exceptions.IncompatibleAuctionException;
 import me.dragosghinea.model.BundleReward;
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.abstracts.Auction;
@@ -63,7 +63,7 @@ public class Main {
         for (Auction a : auctionList) {
             try{
                 auctionServiceLong.addAuction(a);
-            }catch(IncompatibleAuction x){
+            }catch(IncompatibleAuctionException x){
                 auctionServiceBlitz.addAuction(a);
             }
         }
