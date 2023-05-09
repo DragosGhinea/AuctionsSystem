@@ -8,6 +8,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * The LongAuctionService interface extends the AuctionService interface and provides methods for managing long auctions.
+ *
+ * @see AuctionService
+ */
 public non-sealed interface LongAuctionService extends AuctionService {
 
     @Override

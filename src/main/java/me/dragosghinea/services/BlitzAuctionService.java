@@ -8,6 +8,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * The BlitzAuctionService interface extends the AuctionService interface and provides methods for managing blitz auctions.
+ *
+ * @see AuctionService
+ */
 public non-sealed interface BlitzAuctionService extends AuctionService {
 
     @Override
