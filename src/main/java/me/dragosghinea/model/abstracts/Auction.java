@@ -18,7 +18,7 @@ public abstract class Auction {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
-    private BidHistory bidHistory = new BidHistory(this);
+    private BidHistory bidHistory;
     private AuctionState auctionState = AuctionState.UNKNOWN;
 
     private Reward reward;

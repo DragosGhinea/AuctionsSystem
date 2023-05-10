@@ -1,94 +1,107 @@
 package me.dragosghinea.services.impl;
 
-import me.dragosghinea.exceptions.AuctionNotFound;
-import me.dragosghinea.model.UserDetails;
-import me.dragosghinea.model.Wallet;
-import me.dragosghinea.services.BlitzAuctionService;
-import me.dragosghinea.services.LongAuctionService;
-import me.dragosghinea.services.UserService;
+import lombok.RequiredArgsConstructor;
+import me.dragosghinea.exceptions.AuctionNotFoundException;
 import me.dragosghinea.model.User;
+import me.dragosghinea.model.UserDetails;
+import me.dragosghinea.model.abstracts.Auction;
+import me.dragosghinea.repository.UserRepository;
+import me.dragosghinea.services.UserService;
 
-import java.util.*;
-import java.util.function.Predicate;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-
-    private static final Map<UUID, User> users = new HashMap<>();
-    private BlitzAuctionService blitzAuctionService = new BlitzAuctionServiceImpl();
-    private LongAuctionService longAuctionService = new LongAuctionServiceImpl();
+    private final UserRepository userRepository;
 
     @Override
     public Optional<User> getUserById(UUID uuid) {
-        return Optional.ofNullable(users.getOrDefault(uuid, null));
+        try {
+            return userRepository.getUserById(uuid);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
     }
 
     @Override
-    public Optional<User> findFirstUser(Predicate<User> condition) {
-        return users.values().stream().filter(condition).findFirst();
-    }
-
-    @Override
-    public List<User> findAllUsers(Predicate<User> condition) {
-        return users.values().stream().filter(condition).toList();
+    public Optional<User> getUserByUsernameOrEmail(String credential){
+        try {
+            if (credential.contains("@")) {
+                return userRepository.getUserByEmail(credential);
+            } else {
+                return userRepository.getUserByUsername(credential);
+            }
+        }catch(SQLException x){
+            x.printStackTrace();
+            return Optional.empty();
+        }
     }
 
     @Override
     public Optional<User> createUser(UserDetails userDetails) {
-        Predicate<UserDetails> isSimilar = (usrDetails) -> {
-            if (usrDetails.getEmail().equalsIgnoreCase(userDetails.getEmail()))
-                return true;
-            if (usrDetails.getUsername().equalsIgnoreCase(userDetails.getUsername()))
-                return true;
-
-            return false;
-        };
-
-        if (users.values().stream().map(User::getUserDetails).anyMatch(isSimilar)) {
+        try {
+            User newUser = new User(userDetails);
+            if (userRepository.addUser(newUser))
+                return Optional.of(newUser);
+            else
+                return Optional.empty();
+        }catch(SQLException e) {
+            e.printStackTrace();
             return Optional.empty();
         }
-        User newUser = new User(userDetails);
-        newUser.setWallet(new Wallet(newUser));
-        users.put(newUser.getUserId(), newUser);
-        return Optional.of(newUser);
     }
 
     @Override
     public boolean addUser(User user) {
-        return users.putIfAbsent(user.getUserId(), user) == null;
+        try {
+            return userRepository.addUser(user);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
     public boolean removeUser(User user) {
-        return users.remove(user.getUserId(), user);
-    }
-
-    @Override
-    public List<User> removeAllUsers(Predicate<User> condition) {
-        Iterator<Map.Entry<UUID, User>> entriesIterator = users.entrySet().iterator();
-        List<User> removed = new ArrayList<>();
-        while (entriesIterator.hasNext()) {
-            Map.Entry<UUID, User> entry = entriesIterator.next();
-            if (condition.test(entry.getValue())) {
-                removed.add(entry.getValue());
-                entriesIterator.remove();
-            }
+        try {
+            return userRepository.removeUserById(user.getUserId());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
-        return removed;
     }
 
     @Override
-    public boolean addAuctionToUser(UUID userId, UUID auctionId) throws AuctionNotFound {
-        if(longAuctionService.getAuctionById(auctionId).isEmpty() && blitzAuctionService.getAuctionById(auctionId).isEmpty())
-            throw new AuctionNotFound(auctionId);
-        return getUserById(userId)
-                .map(user -> user.getUserAuctions().getAuctions().add(auctionId))
-                .orElse(false);
+    public boolean addAuctionToUser(UUID userId, UUID auctionId) throws AuctionNotFoundException {
+        try {
+            return userRepository.addAuctionToUser(userId, auctionId);
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     @Override
     public boolean removeAuctionFromUser(UUID userId, UUID auctionId) {
-        return getUserById(userId)
-                .map(user -> user.getUserAuctions().getAuctions().remove(auctionId))
-                .orElse(false);
+        try {
+            return userRepository.removeAuctionFromUser(userId, auctionId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public List<Auction> getUserAuctions(UUID userId) {
+        try {
+            return userRepository.getUserAuctions(userId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 }

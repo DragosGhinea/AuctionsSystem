@@ -1,27 +1,26 @@
 package me.dragosghinea.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import me.dragosghinea.model.enums.Currency;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.UUID;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Wallet {
 
-    private User owner;
+    private UUID ownerId;
     private Currency preferredCurrency;
 
     private BigDecimal points = BigDecimal.valueOf(0);
 
-    public Wallet(User owner){
-        this.owner = owner;
+    public Wallet(UUID ownerId){
+        this.ownerId = ownerId;
         this.preferredCurrency = Currency.PNT;
     }
 

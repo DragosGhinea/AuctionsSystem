@@ -1,28 +1,35 @@
 package me.dragosghinea.services.impl;
 
-import me.dragosghinea.exceptions.BidTooLow;
-import me.dragosghinea.exceptions.UserNotFound;
+import me.dragosghinea.exceptions.BidTooLowException;
+import me.dragosghinea.exceptions.UserNotFoundException;
 import me.dragosghinea.model.BidHistory;
 import me.dragosghinea.model.BidRecord;
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.abstracts.Bid;
 import me.dragosghinea.model.enums.Currency;
+import me.dragosghinea.repository.BidHistoryRepository;
+import me.dragosghinea.repository.WalletRepository;
+import me.dragosghinea.repository.impl.postgres.WalletRepositoryImpl;
 import me.dragosghinea.services.BidHistoryService;
 import me.dragosghinea.services.UserService;
+import me.dragosghinea.services.WalletService;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
 
 public class BidHistoryServiceImpl implements BidHistoryService {
     private final BidHistory bidHistory;
-    private final UserService userService = new UserServiceImpl();
-
+    private final UserService userService;
     private final Map<UUID, Bid> highestBids = new LinkedHashMap<>();
+    private final BidHistoryRepository bidHistoryRepository;
 
-    public BidHistoryServiceImpl(BidHistory bidHistory){
+    public BidHistoryServiceImpl(BidHistory bidHistory, UserService userService, BidHistoryRepository bidHistoryRepository){
         this.bidHistory = bidHistory;
+        this.userService = userService;
+        this.bidHistoryRepository = bidHistoryRepository;
         bidHistory.getBids().forEach(bid -> highestBids.put(bid.getUserId(), bid));
     }
 
@@ -54,14 +61,14 @@ public class BidHistoryServiceImpl implements BidHistoryService {
     }
 
     @Override
-    public boolean addBid(UUID userId, BigDecimal points, boolean takePoints) throws BidTooLow, UserNotFound{
+    public boolean addBid(UUID userId, BigDecimal points, boolean takePoints) throws BidTooLowException, UserNotFoundException {
         if(points.compareTo(BigDecimal.ZERO)<0) {
             return false;
         }
 
         BigDecimal latest = getLatestBid().map(Bid::getTotalBidValue).orElse(BigDecimal.ZERO);
         if(latest.compareTo(points)>=0) {
-            throw new BidTooLow(latest, points, userId);
+            throw new BidTooLowException(latest, points, userId);
         }
 
 
@@ -75,10 +82,14 @@ public class BidHistoryServiceImpl implements BidHistoryService {
         if(takePoints){
             Optional<User> user = userService.getUserById(userId);
             if(user.isEmpty())
-                throw new UserNotFound(userId);
+                throw new UserNotFoundException(userId);
+            final WalletRepository walletRepository = new WalletRepositoryImpl();
             Boolean tookPoints = user
                                     .map(User::getWallet)
-                                    .map(wallet -> wallet.removePoints(needsToPay))
+                                    .map(wallet -> {
+                                        WalletService walletService = new WalletServiceImpl(walletRepository, wallet);
+                                        return walletService.removePointsFromWallet(needsToPay);
+                                    })
                                     .orElse(false);
 
             if(!tookPoints) {
@@ -86,16 +97,21 @@ public class BidHistoryServiceImpl implements BidHistoryService {
             }
         }
         else if(userService.getUserById(userId).isEmpty())
-            throw new UserNotFound(userId);
+            throw new UserNotFoundException(userId);
 
         Bid newBid = new BidRecord(userId, getAuction().getAuctionId(), needsToPay, points, LocalDateTime.now());
-        highestBids.put(userId, newBid);
-        bidHistory.getBids().add(newBid);
+        try {
+            bidHistoryRepository.addBid(newBid);
+            highestBids.put(userId, newBid);
+            bidHistory.getBids().add(newBid);
+        }catch(SQLException x){
+            return false;
+        }
         return true;
     }
 
     @Override
-    public boolean addBid(UUID userId, BigDecimal amount, Currency currency, boolean takePoints) throws BidTooLow, UserNotFound{
+    public boolean addBid(UUID userId, BigDecimal amount, Currency currency, boolean takePoints) throws BidTooLowException, UserNotFoundException {
         return addBid(userId, currency.getPointsAmount(amount), takePoints);
     }
 
@@ -128,6 +144,12 @@ public class BidHistoryServiceImpl implements BidHistoryService {
                    return value;
             });
 
+            try {
+                bidHistoryRepository.removeBid(bid);
+            }catch (SQLException x){
+                return false;
+            }
+
             return true;
         }
 
@@ -153,7 +175,13 @@ public class BidHistoryServiceImpl implements BidHistoryService {
             if(!givenPoints)
                 return false;
         }
-        bidHistory.getBids().removeIf(bid -> bid.getUserId().equals(userId));
+
+        try {
+            bidHistoryRepository.removeAllBidsForUser(getAuction().getAuctionId(), userId);
+            bidHistory.getBids().removeIf(bid -> bid.getUserId().equals(userId));
+        }catch(SQLException x){
+            return false;
+        }
         return true;
     }
 

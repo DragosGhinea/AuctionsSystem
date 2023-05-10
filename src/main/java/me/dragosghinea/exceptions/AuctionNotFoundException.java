@@ -5,16 +5,16 @@ import lombok.Getter;
 import java.util.UUID;
 
 @Getter
-public class AuctionNotFound extends RuntimeException {
+public class AuctionNotFoundException extends RuntimeException {
 
     private final UUID auctionId;
 
-    public AuctionNotFound(UUID auctionId){
+    public AuctionNotFoundException(UUID auctionId){
         super("No auction found with the id "+auctionId);
         this.auctionId = auctionId;
     }
 
-    public AuctionNotFound(){
+    public AuctionNotFoundException(){
         super("No auction found for the specified information");
         auctionId = null;
     }

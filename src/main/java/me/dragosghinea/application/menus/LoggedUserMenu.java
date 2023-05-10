@@ -3,20 +3,30 @@ package me.dragosghinea.application.menus;
 import me.dragosghinea.model.User;
 import me.dragosghinea.model.UserDetails;
 import me.dragosghinea.model.abstracts.Auction;
+import me.dragosghinea.repository.impl.postgres.BlitzAuctionRepositoryImpl;
+import me.dragosghinea.repository.impl.postgres.LongAuctionRepositoryImpl;
+import me.dragosghinea.repository.impl.postgres.UserRepositoryImpl;
+import me.dragosghinea.services.AuditService;
 import me.dragosghinea.services.BlitzAuctionService;
 import me.dragosghinea.services.LongAuctionService;
 import me.dragosghinea.services.UserService;
+import me.dragosghinea.services.enums.AuditAction;
+import me.dragosghinea.services.impl.AuditServiceImpl;
 import me.dragosghinea.services.impl.BlitzAuctionServiceImpl;
 import me.dragosghinea.services.impl.LongAuctionServiceImpl;
 import me.dragosghinea.services.impl.UserServiceImpl;
 
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Scanner;
 
 public class LoggedUserMenu implements Menu {
 
     private final Scanner scanner = new Scanner(System.in);
+    private static final AuditService auditService = AuditServiceImpl.getInstance();
 
     @Override
     public Scanner getInputSource() {
@@ -25,9 +35,9 @@ public class LoggedUserMenu implements Menu {
 
     private final User user;
     private boolean shouldExit;
-    private final LongAuctionService longAuctionService = new LongAuctionServiceImpl();
-    private final BlitzAuctionService blitzAuctionService = new BlitzAuctionServiceImpl();
-    private final UserService userService = new UserServiceImpl();
+    private final LongAuctionService longAuctionService = new LongAuctionServiceImpl(new LongAuctionRepositoryImpl());
+    private final BlitzAuctionService blitzAuctionService = new BlitzAuctionServiceImpl(new BlitzAuctionRepositoryImpl());
+    private final UserService userService = new UserServiceImpl(new UserRepositoryImpl());
 
     public LoggedUserMenu(User user) {
         this.user = user;
@@ -36,6 +46,11 @@ public class LoggedUserMenu implements Menu {
     @Override
     public boolean shouldExit() {
         return shouldExit;
+    }
+
+    @Override
+    public void onExit() {
+        auditService.logInfoAction(AuditAction.USER_LOGOUT, "User "+user.getUserDetails().getUsername()+" logged out!", user.getUserDetails().getUsername());
     }
 
     @Override
@@ -54,27 +69,18 @@ public class LoggedUserMenu implements Menu {
                 getOutputSource().println("---------------------------------");
             }
             case VIEW_BID_AUCTIONS -> {
-                Iterator<UUID> auctionIdIterator = user.getUserAuctions().getAuctions().iterator();
-                if (!auctionIdIterator.hasNext())
+                List<Auction> auctions = userService.getUserAuctions(user.getUserId());
+                if(auctions.isEmpty()) {
                     getOutputSource().println("You have not bid on any auction yet!");
+                }
                 else {
-                    while (auctionIdIterator.hasNext()) {
-                        UUID auctionId = auctionIdIterator.next();
-                        longAuctionService.getAuctionById(auctionId).ifPresentOrElse(
-                                (auction) -> getOutputSource().println(auction),
-                                () -> {
-                                    blitzAuctionService.getAuctionById(auctionId).ifPresentOrElse(
-                                            (auction) -> getOutputSource().println(auction),
-                                            auctionIdIterator::remove
-                                    );
-                                }
-                        );
-                    }
+                    for (Auction auction : auctions)
+                        getOutputSource().println(auction);
                 }
             }
             case BROWSE_MOST_BIDS -> {
-                List<Auction> union = new ArrayList<>(blitzAuctionService.getAuctions(a -> true));
-                union.addAll(longAuctionService.getAuctions(a -> true));
+                List<Auction> union = new ArrayList<>(blitzAuctionService.getAuctions());
+                union.addAll(longAuctionService.getAuctions());
                 new AuctionsBrowseMenu(
                         user,
                         union,
@@ -83,8 +89,8 @@ public class LoggedUserMenu implements Menu {
                 ).start();
             }
             case BROWSE_HIGHEST_BID -> {
-                List<Auction> union = new ArrayList<>(blitzAuctionService.getAuctions(a -> true));
-                union.addAll(longAuctionService.getAuctions(a -> true));
+                List<Auction> union = new ArrayList<>(blitzAuctionService.getAuctions());
+                union.addAll(longAuctionService.getAuctions());
                 new AuctionsBrowseMenu(
                         user,
                         union,
@@ -98,7 +104,7 @@ public class LoggedUserMenu implements Menu {
                 ).start();
             }
             case BROWSE_END_SOON -> {
-                List<Auction> union = new ArrayList<>(longAuctionService.getAuctions(a -> true));
+                List<Auction> union = new ArrayList<>(longAuctionService.getAuctions());
                 new AuctionsBrowseMenu(
                         user,
                         union,
@@ -111,11 +117,13 @@ public class LoggedUserMenu implements Menu {
             }
             case DELETE_ACCOUNT -> {
                 if (userService.removeUser(user)) {
+                    auditService.logInfoAction(AuditAction.USER_DELETE_ACCOUNT, "User "+user.getUserDetails().getUsername()+" deleted their account!", user.getUserDetails().getUsername());
                     getOutputSource().println("The account was successfully removed!");
                     shouldExit = true;
-                } else
+                } else {
+                    auditService.logErrorAction(AuditAction.USER_ERROR, "User "+user.getUserDetails().getUsername()+" tried to delete their account but failed.", user.getUserDetails().getUsername());
                     getOutputSource().println("Could not remove the account!");
-
+                }
             }
             default -> {
                 getOutputSource().println("Unknown option '" + input + "'!");

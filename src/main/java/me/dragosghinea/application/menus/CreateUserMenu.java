@@ -1,6 +1,10 @@
 package me.dragosghinea.application.menus;
 
 import me.dragosghinea.model.UserDetails;
+import me.dragosghinea.repository.impl.postgres.UserRepositoryImpl;
+import me.dragosghinea.services.AuditService;
+import me.dragosghinea.services.enums.AuditAction;
+import me.dragosghinea.services.impl.AuditServiceImpl;
 import me.dragosghinea.services.impl.UserServiceImpl;
 
 import java.text.ParseException;
@@ -14,6 +18,7 @@ import java.util.Scanner;
 public class CreateUserMenu implements Menu{
 
     private final Scanner scanner = new Scanner(System.in);
+    private static final AuditService auditService = AuditServiceImpl.getInstance();
 
     @Override
     public Scanner getInputSource() {
@@ -91,10 +96,11 @@ public class CreateUserMenu implements Menu{
                 if(input.matches(op.regexValidator)){
                     UserDetails details = userDetailsBuilder.build();
                     details.setPassword(input);
-                    if(new UserServiceImpl().createUser(details).isEmpty()){
+                    if(new UserServiceImpl(new UserRepositoryImpl()).createUser(details).isEmpty()){
                         getOutputSource().println("Could not create the user! It might have the same email or username as someone else.");
                     }
                     else{
+                        auditService.logInfoAction(AuditAction.USER_CREATE_ACCOUNT, "New user "+details.getUsername()+" has created an account!", "Register Menu");
                         getOutputSource().println("User has been created successfully!");
                     }
                     shouldExit = true;
@@ -126,9 +132,9 @@ public class CreateUserMenu implements Menu{
         BIRTH_DATE("", "The date you entered is invalid! Please respect the format: MM/dd/yyyy", "Birth Date: "),
         PASSWORD("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{4,}$", "The password needs to contain minimum four letters, at least one letter, one number and one special character.", "Password: ");
 
-        private String regexValidator;
-        private String incorrectMessage;
-        private String prompt;
+        private final String regexValidator;
+        private final String incorrectMessage;
+        private final String prompt;
 
         OPTION(String regexValidator, String incorrectMessage, String prompt){
             this.regexValidator = regexValidator;

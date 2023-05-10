@@ -1,5 +1,6 @@
 package me.dragosghinea.model;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,19 +11,37 @@ public class User {
     private UUID userId = UUID.randomUUID();
 
     @Setter
-    private Wallet wallet = new Wallet(this);
+    private Wallet wallet;
     private UserAuctions userAuctions = new UserAuctions();
 
     private UserDetails userDetails;
 
+    public User(){}
+
+    /**
+     * Creates a new user with the given details
+     *
+     * @param details
+     * If the user id of details is null, it will be generated
+     * If the user id of details is not null, it will be used for the user
+     */
     public User(UserDetails details) {
         this.userDetails = (UserDetails) details.clone();
+        if(userDetails.getUserId()==null)
+            userDetails.setUserId(userId);
+        else
+            userId = userDetails.getUserId();
+        wallet = new Wallet(this.userId);
     }
 
     public User(UserDetails details, UserAuctions userAuctions){
         this.userDetails = (UserDetails) details.clone();
-        userDetails.setUserId(userId);
+        if(userDetails.getUserId()==null)
+            userDetails.setUserId(userId);
+        else
+            userId = userDetails.getUserId();
         this.userAuctions = userAuctions;
+        wallet = new Wallet(this.userId);
     }
 
     public void setUserDetails(UserDetails details){

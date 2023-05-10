@@ -18,6 +18,6 @@ public class MultiReward extends Reward {
     private List<String> rewardInfo = new ArrayList<>();
 
     {
-        super.setRewardType(RewardType.MULTIPLE);
+        super.setRewardType(RewardType.MULTI);
     }
 }

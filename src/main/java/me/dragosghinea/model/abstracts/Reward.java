@@ -13,8 +13,9 @@ import java.util.UUID;
 @Setter
 public abstract class Reward {
 
+    @Builder.Default
+    private UUID rewardId = UUID.randomUUID();
     private String rewardName;
     private String rewardDescription;
-    private UUID auctionId;
     private RewardType rewardType = RewardType.UNKNOWN;
 }

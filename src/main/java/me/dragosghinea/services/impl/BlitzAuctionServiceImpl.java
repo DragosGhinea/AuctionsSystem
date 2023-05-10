@@ -1,43 +1,132 @@
 package me.dragosghinea.services.impl;
 
-import me.dragosghinea.exceptions.IncompatibleAuction;
+import lombok.RequiredArgsConstructor;
+import me.dragosghinea.exceptions.IncompatibleAuctionException;
 import me.dragosghinea.model.BlitzAuction;
 import me.dragosghinea.model.abstracts.Auction;
 import me.dragosghinea.model.enums.AuctionState;
+import me.dragosghinea.repository.AuctionRepository;
 import me.dragosghinea.services.BlitzAuctionService;
+import me.dragosghinea.services.updater.InMemoryAuctionStateUpdaterImpl;
+import me.dragosghinea.services.updater.StateChangeEventData;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.function.Predicate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
+@RequiredArgsConstructor
 public class BlitzAuctionServiceImpl implements BlitzAuctionService {
-    private final static Map<UUID, BlitzAuction> auctions = new HashMap<>();
+    private final AuctionRepository<BlitzAuction> auctionRepository;
 
     @Override
-    public boolean addAuction(Auction auction) throws IncompatibleAuction {
-        if(auction instanceof BlitzAuction blitzAuction) {
-            return auctions.compute(auction.getAuctionId(), (key, value) -> {
-                if(value == null)
-                    return blitzAuction;
+    public boolean startAuction(Auction auction) {
+        if(!(auction instanceof BlitzAuction))
+            throw new IncompatibleAuctionException(auction.getClass(), BlitzAuction.class);
 
-                return value;
-            }) == blitzAuction;
+        if (auction.getStartDate().isBefore(LocalDateTime.now()))
+            return false;
+
+        auction.setStartDate(LocalDateTime.now());
+        try {
+            auctionRepository.updateAuction((BlitzAuction) auction);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
-        throw new IncompatibleAuction(auction.getClass(), BlitzAuction.class);
+        return true;
     }
 
     @Override
-    public boolean removeAuction(Auction auction) throws IncompatibleAuction{
+    public boolean cancelAuction(Auction auction) {
+        if (auction.getAuctionState().equals(AuctionState.CANCELLED))
+            return false;
+
+        StateChangeEventData stateChangeEventData = new StateChangeEventData(auction.getAuctionId(), auction.getAuctionState(), AuctionState.CANCELLED, "Blitz", auction);
+        InMemoryAuctionStateUpdaterImpl.getInstance().notifyObservers(stateChangeEventData);
+
+        try {
+            auctionRepository.setState(auction.getAuctionId(), AuctionState.CANCELLED);
+            auction.setAuctionState(AuctionState.CANCELLED);
+        }catch(SQLException x){
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean addAuction(Auction auction) throws IncompatibleAuctionException {
         if(auction instanceof BlitzAuction blitzAuction) {
-            return auctions.remove(auction.getAuctionId(), blitzAuction);
+            InMemoryAuctionStateUpdaterImpl.getInstance().addAuctionToCheck(blitzAuction);
+            try {
+                return auctionRepository.addAuction(blitzAuction);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        throw new IncompatibleAuctionException(auction.getClass(), BlitzAuction.class);
+    }
+
+    @Override
+    public boolean removeAuction(Auction auction) throws IncompatibleAuctionException {
+        if(auction instanceof BlitzAuction blitzAuction) {
+            InMemoryAuctionStateUpdaterImpl.getInstance().removeAuctionToCheck(blitzAuction);
+            try {
+                return auctionRepository.removeAuctionById(blitzAuction.getAuctionId());
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
         }
 
-        throw new IncompatibleAuction(auction.getClass(), BlitzAuction.class);
+        throw new IncompatibleAuctionException(auction.getClass(), BlitzAuction.class);
     }
 
     @Override
     public boolean removeAuction(UUID auctionId) {
-        return auctions.remove(auctionId) != null;
+        InMemoryAuctionStateUpdaterImpl.getInstance().removeAuctionToCheck(auctionId);
+        try {
+            return auctionRepository.removeAuctionById(auctionId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    @Deprecated // the update should be done automatically by the AuctionStateUpdater
+    public AuctionState updateAuctionState(Auction auction) {
+        AuctionState old = auction.getAuctionState();
+        AuctionState newState = getActualState(auction);
+
+        if(newState.equals(old))
+            return old;
+
+        try {
+            auctionRepository.setState(auction.getAuctionId(), newState);
+            auction.setAuctionState(newState);
+            return newState;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return old;
+        }
+    }
+
+    @Override
+    public boolean updateAuction(Auction auction) {
+        if(auction instanceof BlitzAuction blitzAuction) {
+            try {
+                return auctionRepository.updateAuction(blitzAuction);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+
+        throw new IncompatibleAuctionException(auction.getClass(), BlitzAuction.class);
     }
 
     @Override
@@ -58,7 +147,7 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
         if(blitzAuction.getActualStartDate().isAfter(now))
             return AuctionState.PREPARING;
 
-        if(!blitzAuction.getEndDate().isBefore(now))
+        if(blitzAuction.getEndDate().isBefore(now))
             return AuctionState.ENDED;
 
         return AuctionState.ONGOING;
@@ -66,19 +155,28 @@ public class BlitzAuctionServiceImpl implements BlitzAuctionService {
 
     @Override
     public Optional<BlitzAuction> getAuctionById(UUID auctionId) {
-        BlitzAuction auction = auctions.getOrDefault(auctionId, null);
-        if(auction == null)
-            return Optional.empty();
+        try {
+            BlitzAuction auction = auctionRepository.getAuctionById(auctionId).orElse(null);
+            if (auction == null)
+                return Optional.empty();
 
-        auction.setAuctionState(getActualState(auction));
-        return Optional.of(auction);
+            InMemoryAuctionStateUpdaterImpl.getInstance().addAuctionToCheck(auction);
+            return Optional.of(auction);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
     }
 
     @Override
-    public List<BlitzAuction> getAuctions(Predicate<BlitzAuction> check) {
-        return auctions.values().stream()
-                .filter(check)
-                .peek(auction -> auction.setAuctionState(getActualState(auction)))
-                .toList();
+    public List<BlitzAuction> getAuctions() {
+        try {
+            List<BlitzAuction> blitzAuctions = auctionRepository.getAllAuctions();
+            InMemoryAuctionStateUpdaterImpl.getInstance().addBlitzAuctionListToCheck(blitzAuctions);
+            return blitzAuctions;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 }
