@@ -23,12 +23,18 @@ public class InMemoryAuctionStateUpdaterImpl implements AuctionStateUpdater{
     private final AuctionService auctionServiceLong;
     private final AuctionService auctionServiceBlitz;
 
+    private final ScheduledExecutorService scheduledExecutorService;
+
+    public void close(){
+        scheduledExecutorService.shutdown();
+    }
+
     private InMemoryAuctionStateUpdaterImpl(AuctionService auctionServiceLong, AuctionService auctionServiceBlitz){
         this.auctionServiceLong = auctionServiceLong;
         this.auctionServiceBlitz = auctionServiceBlitz;
 
-        ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-        service.scheduleWithFixedDelay(() -> {
+        scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+        scheduledExecutorService.scheduleWithFixedDelay(() -> {
             List<StateChangeEventData> toNotify = new ArrayList<>();
             for(LongAuction auction : toCheckAndUpdateLong){
                 AuctionState oldState = auction.getAuctionState();
