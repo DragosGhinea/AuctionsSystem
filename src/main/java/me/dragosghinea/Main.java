@@ -69,5 +69,6 @@ public class Main {
         }
 
         new MainMenu().start();
+        InMemoryAuctionStateUpdaterImpl.getInstance().close();
     }
 }
